@@ -1,0 +1,6 @@
+from django.urls import path
+from faqs import views
+
+urlpatterns = [
+    path("", views.faq_list, name="faq_list"),
+]
