@@ -3,4 +3,4 @@ from django.http import HttpResponse
 
 
 def faq_list(request):
-    return HttpResponse("This is the FAQ list page.")
+    return render(request, "faqs/list.html")

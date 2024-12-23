@@ -1,0 +1,23 @@
+{% load bootstrap_icons %}
+<header class="p-3 text-bg-dark fixed-top">
+    <div class="container">
+        <div class="d-flex flex-wrap align-items-center justify-content-center justify-content-lg-start">
+            <a href="/"
+               class="d-flex align-items-center mb-2 mb-lg-0 text-white text-decoration-none">
+                {% bs_icon 'box2-heart-fill' size='1.5em' extra_classes='me-2' %}
+                <span class="fs-4">Sponsor A Child</span>
+            </a>
+            <ul class="nav col-12 col-lg-auto mb-2 justify-content-center mb-md-0 ms-auto">
+                <li>
+                    {% comment %} <a href="{% url 'top-page' %}" class="nav-link px-2 {% if request.path == '/' %}text-secondary{% else %}text-white{% endif %}">
+                Top
+                    </a> {% endcomment %}
+                </li>
+                <li>
+                    <a href="{% url 'faq_list' %}" class="nav-link px-2 text-white">FAQs</a>
+                </li>
+                {% comment %} <li><a href="{% url 'sponsor' %}" class="nav-link px-2 text-white">Sponsor a Child</a></li> {% endcomment %}
+            </ul>
+        </div>
+    </div>
+</header>
