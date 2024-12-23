@@ -1,0 +1,5 @@
+question,answer
+"Is this a normal case?","Yes, this is."
+"","The question is empty!"
+"Answer is empty?",""
+"This question exceeds the maximum allowed length of 255 characters, which means that this question should trigger a validation error because it is way too long for the database column, which is limited to 255 characters. This question exceeds the maximum a","Valid answer for a very long question."
