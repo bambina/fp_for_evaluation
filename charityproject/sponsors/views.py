@@ -1,3 +1,5 @@
 from django.shortcuts import render
 
-# Create your views here.
+
+def child_list(request):
+    return render(request, "sponsors/child_list.html")

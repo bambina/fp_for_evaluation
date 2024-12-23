@@ -9,14 +9,19 @@
             </a>
             <ul class="nav col-12 col-lg-auto mb-2 justify-content-center mb-md-0 ms-auto">
                 <li>
-                    {% comment %} <a href="{% url 'top-page' %}" class="nav-link px-2 {% if request.path == '/' %}text-secondary{% else %}text-white{% endif %}">
-                Top
-                    </a> {% endcomment %}
+                    <a href="{% url 'top' %}"
+                       class="nav-link px-2 {% if request.resolver_match.url_name == 'top' %}text-secondary{% else %}text-white{% endif %}">
+                        Top
+                    </a>
                 </li>
                 <li>
-                    <a href="{% url 'faq_list' %}" class="nav-link px-2 text-white">FAQs</a>
+                    <a href="{% url 'faq_list' %}"
+                       class="nav-link px-2 {% if request.resolver_match.url_name == 'faq_list' %}text-secondary{% else %}text-white{% endif %}">FAQs</a>
                 </li>
-                {% comment %} <li><a href="{% url 'sponsor' %}" class="nav-link px-2 text-white">Sponsor a Child</a></li> {% endcomment %}
+                <li>
+                    <a href="{% url 'sponsors:child_list' %}"
+                       class="nav-link px-2 {% if request.resolver_match.namespace == 'sponsors' and request.resolver_match.url_name == 'child_list' %}text-secondary{% else %}text-white{% endif %}">Sponsor a Child</a>
+                </li>
             </ul>
         </div>
     </div>
