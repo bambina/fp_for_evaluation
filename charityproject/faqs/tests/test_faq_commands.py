@@ -7,7 +7,7 @@ from io import StringIO
 @pytest.mark.django_db
 def test_populate_data():
     out = StringIO()
-    call_command("populate_data", "--faq", "test_faq.csv", stdout=out)
+    call_command("populate_faq_data", "--faq", "test_faqs.csv", stdout=out)
 
     assert FAQEntry.objects.count() == 1
     faq = FAQEntry.objects.first()

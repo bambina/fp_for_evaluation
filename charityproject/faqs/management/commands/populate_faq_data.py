@@ -5,10 +5,11 @@ import csv
 from django.core.exceptions import ValidationError
 from pathlib import Path
 from core.validators import max_length_255_validator
+from core.utils import *
 
 
 class Command(BaseCommand):
-    # python manage.py populate_data --help
+    # python manage.py populate_faq_data --help
     help = "Populate the database with sample data.\n\n"
 
     def add_arguments(self, parser):
@@ -16,8 +17,8 @@ class Command(BaseCommand):
         parser.add_argument(
             "--faq",
             type=str,
-            default="faq.csv",
-            help="The CSV file to load data from (default: faq.csv).",
+            default="faqs.csv",
+            help="The CSV file to load data from (default: faqs.csv).",
         )
 
     def handle(self, *args, **kwargs):
@@ -38,12 +39,22 @@ class Command(BaseCommand):
             # Populate the database
             faq_records = self.read_faq_data(file_paths["faq"])
             FAQEntry.objects.bulk_create(faq_records)
-            self.write_success(f"{len(faq_records)} faqs created from {kwargs['faq']}")
+            write_success(
+                self.stdout,
+                self.style,
+                f"{len(faq_records)} faqs created from {kwargs['faq']}",
+            )
             total_records += len(faq_records)
 
-            self.write_success(f"Total records created: {total_records}")
+            write_success(
+                self.stdout, self.style, f"Total records created: {total_records}"
+            )
         except Exception as e:
-            self.write_error(f"An error occurred while populating the database: {e}")
+            write_error(
+                self.stdout,
+                self.style,
+                f"An error occurred while populating the database: {e}",
+            )
 
     def read_faq_data(self, file_path):
         faqs = []
@@ -61,20 +72,10 @@ class Command(BaseCommand):
                     max_length_255_validator(question)
                     faqs.append(FAQEntry(question=question, answer=answer))
                 except ValidationError as e:
-                    self.write_error(
-                        f"Validation error in row {csv_reader.line_num}: {e}"
+                    write_error(
+                        self.stdout,
+                        self.style,
+                        f"Validation error in row {csv_reader.line_num}: {e}",
                     )
                     continue
         return faqs
-
-    def write_success(self, msg):
-        """
-        Utility function to write a success message to stdout with SUCCESS styling.
-        """
-        self.stdout.write(self.style.SUCCESS(msg))
-
-    def write_error(self, msg):
-        """
-        Utility function to write an error message to stdout with ERROR styling.
-        """
-        self.stdout.write(self.style.ERROR(msg))
