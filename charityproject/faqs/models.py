@@ -14,6 +14,7 @@ class FAQEntry(models.Model):
         indexes = [
             models.Index(fields=["question", "answer"]),
         ]
+        ordering = ["created_at"]
 
     def __str__(self):
         return self.question
