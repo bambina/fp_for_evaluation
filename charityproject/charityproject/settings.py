@@ -36,6 +36,7 @@ INSTALLED_APPS = [
     "django_bootstrap_icons",
     "core.apps.CoreConfig",
     "faqs.apps.FaqsConfig",
+    "sponsors.apps.SponsorsConfig",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
