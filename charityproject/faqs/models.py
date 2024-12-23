@@ -2,7 +2,6 @@ from django.db import models
 
 
 class FAQEntry(models.Model):
-    title = models.CharField(max_length=50)
     question = models.CharField(max_length=255)
     answer = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
@@ -13,8 +12,8 @@ class FAQEntry(models.Model):
         verbose_name = "FAQ Entry"
         verbose_name_plural = "FAQ Entries"
         indexes = [
-            models.Index(fields=["title", "question", "answer"]),
+            models.Index(fields=["question", "answer"]),
         ]
 
     def __str__(self):
-        return self.title
+        return self.question
