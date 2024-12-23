@@ -1,0 +1,79 @@
+{% extends "./base.html" %}
+{% load static %}
+{% load bootstrap_icons %}
+{% block content %}
+    <section class="hero-section py-5 mt-5">
+        <div class="container py-5">
+            <div class="col-lg-7 col-md-8 py-2">
+                <h1 class="fw-light text-shadow-lg">Together, we can light the way.</h1>
+                <p class="lead text-shadow-lg">
+                    Your small act of kindness can brighten the future of children in need. Every donation brings hope, education, and a chance for a better tomorrow.
+                </p>
+                <p>
+                    <a href="#" class="btn btn-primary my-2">Donate Now</a>
+                    <a href="#" class="btn btn-secondary my-2">Sponsor a Child</a>
+                </p>
+            </div>
+        </div>
+    </section>
+    <section class="py-5 text-center">
+        <div class="container">
+            <h2 class="fw-bold mb-4">Chat with Nico</h2>
+            <p class="lead">
+                Got questions? Meet our chatbot, Nico!
+                <br>
+                Here to assist you with information about our mission, donations, or anything else you need.
+            </p>
+            <!-- Start a chat button -->
+            {% comment %} <a href="{% url 'start-chat' %}" class="btn btn-primary btn-lg">
+            Start a chat
+            {% bs_icon 'chevron-right' %}
+            </a> {% endcomment %}
+        </div>
+    </section>
+    <section class="three-column-section py-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="card">
+                        <img src="{% static 'core/images/mission.jpg' %}"
+                             class="card-img-top"
+                             alt="Our Mission">
+                        <div class="card-body text-center">
+                            <h5 class="card-title">Our Mission</h5>
+                            <p class="card-text">Learn about our mission to empower children through education, healthcare, and support.</p>
+                            <a href="#" class="btn btn-primary">Read More</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card">
+                        <img src="{% static 'core/images/activities.jpg' %}"
+                             class="card-img-top"
+                             alt="What We Do">
+                        <div class="card-body text-center">
+                            <h5 class="card-title">What We Do</h5>
+                            <p class="card-text">Discover the initiatives we undertake to improve the lives of children in need.</p>
+                            <a href="#" class="btn btn-primary">Learn More</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card">
+                        <img src="{% static 'core/images/news.jpg' %}"
+                             class="card-img-top"
+                             alt="Latest News">
+                        <div class="card-body text-center">
+                            <h5 class="card-title">Latest News</h5>
+                            <p class="card-text">Stay updated with our latest news and stories about the impact of your support.</p>
+                            <a href="#" class="btn btn-primary">Explore</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+{% endblock %}
+{% block extra_js %}
+    <script src="{% static 'core/js/test.js' %}"></script>
+{% endblock %}
