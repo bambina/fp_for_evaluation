@@ -1,0 +1,7 @@
+name,gender,country,profile_description,date_of_birth
+Liam,Male,Kenya,Valid case,2021-06-12
+,Male,Kenya,Invalid Case: name is empty,2021-06-12
+Chris,Mole,Kenya,Invalid Case: gender is invalid,2021-06-12
+Bob,Male,Invalid Country,Invalid Case: country is invalid,2021-06-12
+Alex,Male,Kenya,Invalid Case: birth_date is empty,
+Dave,Male,Kenya,Invalid Case: birth_date is too old,1900-06-12

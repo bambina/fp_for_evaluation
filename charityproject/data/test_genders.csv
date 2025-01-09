@@ -1,0 +1,5 @@
+name
+Male
+Duplicate names for name are invalid
+Duplicate names for name are invalid
+This test case verifies that the name field is invalid if it exceeds 50 chars

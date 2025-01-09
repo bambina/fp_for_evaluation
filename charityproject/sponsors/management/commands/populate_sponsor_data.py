@@ -14,33 +14,47 @@ class Command(BaseCommand):
     help = "Populate the database with sample data.\n\n"
 
     def add_arguments(self, parser):
-        # Add an optional argument to specify the CSV file to load data from
+        # Add an optional argument to specify test mode
+        parser.add_argument(
+            "--test",
+            action="store_true",
+            help="Use test CSV files (test_*.csv).",
+        )
+        # Optional arguments for custom file paths
         parser.add_argument(
             "--country",
             type=str,
             default="countries.csv",
-            help="The CSV file to load data from (default: countries.csv).",
+            help="The CSV file to load country data from (default: countries.csv).",
         )
         parser.add_argument(
             "--gender",
             type=str,
             default="genders.csv",
-            help="The CSV file to load data from (default: genders.csv).",
+            help="The CSV file to load gender data from (default: genders.csv).",
         )
         parser.add_argument(
             "--child",
             type=str,
             default="children.csv",
-            help="The CSV file to load data from (default: children.csv).",
+            help="The CSV file to load child data from (default: children.csv).",
         )
 
     def handle(self, *args, **kwargs):
         # Get the file path from the command line arguments
-        file_paths = {
-            "country": Path(settings.DATA_DIR) / kwargs["country"],
-            "gender": Path(settings.DATA_DIR) / kwargs["gender"],
-            "child": Path(settings.DATA_DIR) / kwargs["child"],
-        }
+        if kwargs["test"]:
+            file_paths = {
+                "country": Path(settings.DATA_DIR) / "test_countries.csv",
+                "gender": Path(settings.DATA_DIR) / "test_genders.csv",
+                "child": Path(settings.DATA_DIR) / "test_children.csv",
+            }
+        else:
+            file_paths = {
+                "country": Path(settings.DATA_DIR) / kwargs["country"],
+                "gender": Path(settings.DATA_DIR) / kwargs["gender"],
+                "child": Path(settings.DATA_DIR) / kwargs["child"],
+            }
+        # Check if the files exist
         for file_path in file_paths.values():
             if not file_path.exists():
                 raise FileNotFoundError(f"File {file_path} not found")
@@ -124,6 +138,7 @@ class Command(BaseCommand):
 
     def read_gender_data(self, file_path):
         genders = []
+        seen_names = set()  # Track unique names
         with open(file_path, mode="r", encoding="utf-8") as csv_file:
             csv_reader = csv.reader(csv_file, delimiter=",")
             csv_reader.__next__()
@@ -133,9 +148,12 @@ class Command(BaseCommand):
                     name = row[0].strip()
                     if not name:
                         raise ValidationError("Name cannot be empty")
+                    if name in seen_names:
+                        raise ValidationError(f"Duplicate name detected: '{name}'")
                     # Validate the question length
                     max_length_50_validator(name)
                     genders.append(Gender(name=name))
+                    seen_names.add(name)
                 except ValidationError as e:
                     write_error(
                         self.stdout,
@@ -161,8 +179,10 @@ class Command(BaseCommand):
                     # Validate individual fields
                     max_length_255_validator(name)
                     validate_birth_date(birth_date_str)
+                    # Convert the valid string to a datetime.date object
+                    birth_date = datetime.strptime(birth_date_str, "%Y-%m-%d").date()
                     # Compute age from birth date
-                    age = calculate_age(birth_date_str)
+                    age = calculate_age(birth_date)
                     # Create and append the child object
                     children.append(
                         Child(
@@ -171,7 +191,7 @@ class Command(BaseCommand):
                             gender=gender,
                             country=country,
                             profile_description=profile_description,
-                            date_of_birth=birth_date_str,
+                            date_of_birth=birth_date,
                         )
                     )
                 except Exception as e:
