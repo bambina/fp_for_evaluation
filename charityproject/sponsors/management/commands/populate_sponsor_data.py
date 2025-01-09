@@ -6,6 +6,7 @@ from django.core.exceptions import ValidationError
 from pathlib import Path
 from core.validators import *
 from core.utils import *
+from sponsors.utils import *
 
 
 class Command(BaseCommand):
@@ -20,11 +21,25 @@ class Command(BaseCommand):
             default="countries.csv",
             help="The CSV file to load data from (default: countries.csv).",
         )
+        parser.add_argument(
+            "--gender",
+            type=str,
+            default="genders.csv",
+            help="The CSV file to load data from (default: genders.csv).",
+        )
+        parser.add_argument(
+            "--child",
+            type=str,
+            default="children.csv",
+            help="The CSV file to load data from (default: children.csv).",
+        )
 
     def handle(self, *args, **kwargs):
         # Get the file path from the command line arguments
         file_paths = {
             "country": Path(settings.DATA_DIR) / kwargs["country"],
+            "gender": Path(settings.DATA_DIR) / kwargs["gender"],
+            "child": Path(settings.DATA_DIR) / kwargs["child"],
         }
         for file_path in file_paths.values():
             if not file_path.exists():
@@ -34,7 +49,9 @@ class Command(BaseCommand):
 
         try:
             # Delete exisiting data
+            Child.objects.all().delete()
             Country.objects.all().delete()
+            Gender.objects.all().delete()
 
             # Populate the database
             country_records = self.read_country_data(file_paths["country"])
@@ -42,9 +59,27 @@ class Command(BaseCommand):
             write_success(
                 self.stdout,
                 self.style,
-                f"{len(country_records)} countries created from {kwargs['country']}",
+                f"{len(country_records)} items created from {kwargs['country']}",
             )
             total_records += len(country_records)
+
+            gender_records = self.read_gender_data(file_paths["gender"])
+            Gender.objects.bulk_create(gender_records)
+            write_success(
+                self.stdout,
+                self.style,
+                f"{len(gender_records)} items created from {kwargs['gender']}",
+            )
+            total_records += len(gender_records)
+
+            childlen_records = self.read_child_data(file_paths["child"])
+            Child.objects.bulk_create(childlen_records)
+            write_success(
+                self.stdout,
+                self.style,
+                f"{len(childlen_records)} items created from {kwargs['child']}",
+            )
+            total_records += len(childlen_records)
 
             write_success(
                 self.stdout, self.style, f"Total records created: {total_records}"
@@ -86,3 +121,64 @@ class Command(BaseCommand):
                     )
                     continue
         return countries
+
+    def read_gender_data(self, file_path):
+        genders = []
+        with open(file_path, mode="r", encoding="utf-8") as csv_file:
+            csv_reader = csv.reader(csv_file, delimiter=",")
+            csv_reader.__next__()
+            for row in csv_reader:
+                try:
+                    # Assign the row data to variables
+                    name = row[0].strip()
+                    if not name:
+                        raise ValidationError("Name cannot be empty")
+                    # Validate the question length
+                    max_length_50_validator(name)
+                    genders.append(Gender(name=name))
+                except ValidationError as e:
+                    write_error(
+                        self.stdout,
+                        self.style,
+                        f"Validation error in row {csv_reader.line_num}: {e}",
+                    )
+                    continue
+        return genders
+
+    def read_child_data(self, file_path):
+        children = []
+        with open(file_path, mode="r", encoding="utf-8") as csv_file:
+            csv_reader = csv.reader(csv_file, delimiter=",")
+            csv_reader.__next__()
+            for row in csv_reader:
+                try:
+                    # Extract and clean the row data
+                    name = row[0].strip()
+                    gender = Gender.objects.get(name=row[1].strip())
+                    country = Country.objects.get(name=row[2].strip())
+                    profile_description = row[3].strip()
+                    birth_date_str = row[4].strip()
+                    # Validate individual fields
+                    max_length_255_validator(name)
+                    validate_birth_date(birth_date_str)
+                    # Compute age from birth date
+                    age = calculate_age(birth_date_str)
+                    # Create and append the child object
+                    children.append(
+                        Child(
+                            name=name,
+                            age=age,
+                            gender=gender,
+                            country=country,
+                            profile_description=profile_description,
+                            date_of_birth=birth_date_str,
+                        )
+                    )
+                except Exception as e:
+                    write_error(
+                        self.stdout,
+                        self.style,
+                        f"Exception in row {csv_reader.line_num}: {e}",
+                    )
+                    continue
+        return children

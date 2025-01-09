@@ -23,9 +23,22 @@ class Country(models.Model):
         return f"{self.name} ({self.code}, {self.numeric_code})"
 
 
+class Gender(models.Model):
+    name = models.CharField(max_length=50, unique=True)
+
+    class Meta:
+        ordering = ["name"]
+
+    def __str__(self):
+        return self.name
+
+
 class Child(models.Model):
     name = models.CharField(max_length=255)
     age = models.PositiveIntegerField()
+    gender = models.ForeignKey(
+        Gender, on_delete=models.PROTECT, related_name="children"
+    )
     country = models.ForeignKey(
         Country, on_delete=models.CASCADE, related_name="children"
     )
