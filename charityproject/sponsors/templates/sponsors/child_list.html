@@ -4,38 +4,41 @@
     <div class="container py-3 mt-5">
         <h1 class="text-center mb-4 mt-5">Sponsor a Child</h1>
         <!-- Child list -->
-        <div class="row row-cols-1 row-cols-md-4 g-4">
-            {% for child in children %}
-                <!-- Card 1 -->
-                <div class="col">
-                    <div class="card h-100">
-                        <img src="{{ MEDIA_URL }}placeholder_child_drawing.jpg"
-                             class="card-img-top"
-                             alt="Child Image">
-                        <div class="card-body">
-                            <h5 class="card-title">{{ child.name }}</h5>
-                            <p class="card-text">
-                                <strong>Age:</strong> {{ child.age }}
-                                <br>
-                                <strong>Location:</strong> Honduras
-                                <br>
-                                Carlos loves drawing and enjoys playing soccer with his friends.
-                            </p>
+        <div class="row justify-content-center">
+            <div class="col-8">
+                <div class="row row-cols-1 row-cols-md-3 g-4">
+                    {% for child in children %}
+                        <div class="col">
+                            <div class="card h-100">
+                                <img src="{{ MEDIA_URL }}placeholder_child_drawing.jpg"
+                                     class="card-img-top"
+                                     alt="Child Image">
+                                <div class="card-body">
+                                    <h5 class="card-title">{{ child.name }}</h5>
+                                    <p class="card-text">
+                                        <strong>Age:</strong> {{ child.age }}
+                                        <br>
+                                        <strong>Date of Birth:</strong> {{ child.date_of_birth }}
+                                        <br>
+                                        <strong>Location:</strong> {{ child.country.name }}
+                                    </p>
+                                </div>
+                                <div class="card-footer">
+                                    <a href="#" class="btn btn-primary">Learn More</a>
+                                </div>
+                            </div>
                         </div>
-                        <div class="card-footer">
-                            <a href="#" class="btn btn-primary">Learn More</a>
-                        </div>
-                    </div>
+                    {% endfor %}
                 </div>
-            {% endfor %}
+            </div>
         </div>
         <!-- Pagination -->
         <nav aria-label="Page navigation" class="mt-4">
             <ul class="pagination justify-content-center">
                 <!-- Previous Button -->
-                {% if faqs.has_previous %}
+                {% if children.has_previous %}
                     <li class="page-item">
-                        <a class="page-link" href="?page={{ faqs.previous_page_number }}">Previous</a>
+                        <a class="page-link" href="?page={{ children.previous_page_number }}">Previous</a>
                     </li>
                 {% else %}
                     <li class="page-item disabled">
@@ -43,8 +46,8 @@
                     </li>
                 {% endif %}
                 <!-- Page Numbers -->
-                {% for page_num in faqs.paginator.page_range %}
-                    {% if page_num == faqs.number %}
+                {% for page_num in children.paginator.page_range %}
+                    {% if page_num == children.number %}
                         <li class="page-item active" aria-current="page">
                             <a class="page-link" href="#">{{ page_num }}</a>
                         </li>
@@ -55,9 +58,9 @@
                     {% endif %}
                 {% endfor %}
                 <!-- Next Button -->
-                {% if faqs.has_next %}
+                {% if children.has_next %}
                     <li class="page-item">
-                        <a class="page-link" href="?page={{ faqs.next_page_number }}">Next</a>
+                        <a class="page-link" href="?page={{ children.next_page_number }}">Next</a>
                     </li>
                 {% else %}
                     <li class="page-item disabled">
