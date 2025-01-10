@@ -20,7 +20,7 @@ class Country(models.Model):
         ]
 
     def __str__(self):
-        return f"{self.name} ({self.code}, {self.numeric_code})"
+        return self.name
 
 
 class Gender(models.Model):

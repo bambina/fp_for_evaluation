@@ -3,6 +3,17 @@
 {% block content %}
     <div class="container py-3 mt-5">
         <h1 class="text-center mb-4 mt-5">Sponsor a Child</h1>
+        <form method="get">
+            {% if any_non_field_errors %}
+                <div class="alert alert-danger">
+                    {% for form in forms %}
+                        {% for error in form.non_field_errors %}{{ error }}{% endfor %}
+                    {% endfor %}
+                </div>
+            {% endif %}
+            {{ search_form.as_p }}
+            <button type="submit" class="btn btn-primary">Search</button>
+        </form>
         <!-- Child list -->
         <div class="row justify-content-center">
             <div class="col-8">
@@ -20,7 +31,7 @@
                                         <br>
                                         <strong>Date of Birth:</strong> {{ child.date_of_birth }}
                                         <br>
-                                        <strong>Location:</strong> {{ child.country.name }}
+                                        <strong>Country:</strong> {{ child.country.name }}
                                     </p>
                                 </div>
                                 <div class="card-footer">
@@ -31,6 +42,11 @@
                     {% endfor %}
                 </div>
             </div>
+            {% if not children %}
+                <div class="text-center text-muted">
+                    <p>No children found matching your criteria.</p>
+                </div>
+            {% endif %}
         </div>
         <!-- Pagination -->
         <nav aria-label="Page navigation" class="mt-4">
