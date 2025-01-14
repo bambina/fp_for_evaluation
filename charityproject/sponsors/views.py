@@ -5,9 +5,19 @@ from sponsors.models import *
 from sponsors.forms import ChildSearchForm
 from django.shortcuts import get_object_or_404
 
+from core.utils import track_user_with_session
+from django.views.decorators.csrf import csrf_exempt
+
+from django.shortcuts import redirect
+from django.contrib import messages
+from django.http import JsonResponse
+
 
 def child_list(request):
     """List view for children with search and pagination."""
+    # Track user with session key
+    track_user_with_session(request, event="Viewed Child List")
+
     # Save search query to session if exists, otherwise clear it
     if request.GET:
         request.session["child_list_query"] = request.GET.urlencode()
@@ -46,6 +56,19 @@ def child_detail(request, pk):
         "sponsors/child_detail.html",
         {"child": child, "query_string": query_string},
     )
+
+
+@csrf_exempt
+def sponsor_me_button_click(request, child_id):
+    """Handle Sponsor Me button click event."""
+    if request.method == "POST":
+        track_user_with_session(request, f"Clicked Sponsor Me Button")
+        messages.success(request, "Thank you for participating in the experiment!")
+
+        # Redirect to the child detail page
+        return redirect("sponsors:child_detail", pk=child_id)
+
+    return JsonResponse({"error": "Invalid request method"}, status=400)
 
 
 def get_filtered_children(search_form):

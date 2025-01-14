@@ -29,7 +29,11 @@
                             </li>
                         </ul>
                         <!-- Sponsor button -->
-                        <a href="#" class="btn btn-primary mt-3 btn-lg">Sponsor {{ child.name }}</a>
+                        <form method="POST"
+                              action="{% url 'sponsors:sponsor_me_button_click' child_id=child.pk %}">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-primary mt-3 btn-lg">Sponsor {{ child.name }}</button>
+                        </form>
                     </div>
                 </div>
                 <div class="row">
