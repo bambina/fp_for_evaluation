@@ -3,9 +3,17 @@ from django.core.paginator import Paginator
 from sponsors.repositories import *
 from sponsors.models import *
 from sponsors.forms import ChildSearchForm
+from django.shortcuts import get_object_or_404
 
 
 def child_list(request):
+    """List view for children with search and pagination."""
+    # Save search query to session if exists, otherwise clear it
+    if request.GET:
+        request.session["child_list_query"] = request.GET.urlencode()
+    else:
+        request.session.pop("child_list_query", None)
+
     # Init the search form
     search_form = ChildSearchForm(request.GET or None)
 
@@ -22,6 +30,22 @@ def child_list(request):
     }
 
     return render(request, "sponsors/child_list.html", context)
+
+
+def child_detail(request, pk):
+    """Detail view for a specific child."""
+    # Get the child object or return 404
+    child = get_object_or_404(Child, pk=pk)
+
+    # Get saved search query from session
+    query_string = request.session.get("child_list_query", "")
+
+    # Pass the query string to the template
+    return render(
+        request,
+        "sponsors/child_detail.html",
+        {"child": child, "query_string": query_string},
+    )
 
 
 def get_filtered_children(search_form):

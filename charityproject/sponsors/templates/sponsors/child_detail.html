@@ -1,0 +1,49 @@
+{% extends "core/base.html" %}
+{% load bootstrap_icons %}
+{% block content %}
+    <div class="container py-3 mt-5">
+        <div class="mt-5 row justify-content-center">
+            <div class="col-9">
+                <div class="row">
+                    <!-- Child's photo -->
+                    <div class="col-4">
+                        <img src="{{ MEDIA_URL }}placeholder_child_drawing.jpg"
+                             class="img-fluid rounded"
+                             alt="{{ child.name }}">
+                    </div>
+                    <!-- Child's basic information -->
+                    <div class="col-5">
+                        <h2>{{ child.name }}</h2>
+                        <ul class="list-unstyled">
+                            <li>
+                                Age: <strong>{{ child.age }}</strong>
+                            </li>
+                            <li>
+                                Date of Birth: <strong>{{ child.date_of_birth }}</strong>
+                            </li>
+                            <li>
+                                Gender: <strong>{{ child.gender }}</strong>
+                            </li>
+                            <li>
+                                Country: <strong>{{ child.country }}</strong>
+                            </li>
+                        </ul>
+                        <!-- Sponsor button -->
+                        <a href="#" class="btn btn-primary mt-3 btn-lg">Sponsor {{ child.name }}</a>
+                    </div>
+                </div>
+                <div class="row">
+                    <!-- Child's profile description -->
+                    <p class="mt-4">{{ child.profile_description }}</p>
+                </div>
+                <div class="row">
+                    <!-- Back to the child list page -->
+                    <div class="text-center mt-5">
+                        <a href="{% url 'sponsors:child_list' %}?{{ query_string }}"
+                           class="btn btn-secondary">Back to List</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

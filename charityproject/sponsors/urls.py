@@ -5,5 +5,5 @@ app_name = "sponsors"
 
 urlpatterns = [
     path("children/", views.child_list, name="child_list"),
-    # path("children/<int:pk>/", views.child_detail, name="child_detail"),
+    path("children/<int:pk>/", views.child_detail, name="child_detail"),
 ]

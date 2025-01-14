@@ -28,28 +28,28 @@
         </form>
         <!-- Child list -->
         <div class="row justify-content-center">
-            <div class="col-8">
-                <div class="row row-cols-1 row-cols-md-3 g-4">
+            <div class="col-9">
+                <div class="row row-cols-1 row-cols-md-3 g-3">
                     {% for child in children %}
                         <div class="col">
-                            <div class="card h-100">
-                                <img src="{{ MEDIA_URL }}placeholder_child_drawing.jpg"
-                                     class="card-img-top"
-                                     alt="Child Image">
-                                <div class="card-body">
-                                    <h5 class="card-title">{{ child.name }}</h5>
-                                    <p class="card-text">
-                                        <strong>Age:</strong> {{ child.age }}
-                                        <br>
-                                        <strong>Date of Birth:</strong> {{ child.date_of_birth }}
-                                        <br>
-                                        <strong>Country:</strong> {{ child.country.name }}
-                                    </p>
+                            <a href="{% url 'sponsors:child_detail' child.pk %}"
+                               class="text-decoration-none text-dark">
+                                <div class="card h-100">
+                                    <img src="{{ MEDIA_URL }}placeholder_child_drawing.jpg"
+                                         class="card-img-top"
+                                         alt="Child Image">
+                                    <div class="card-body">
+                                        <h5 class="card-title">{{ child.name }}</h5>
+                                        <p class="card-text">
+                                            Age: <strong>{{ child.age }}</strong>
+                                            <br>
+                                            Date of Birth: <strong>{{ child.date_of_birth }}</strong>
+                                            <br>
+                                            Country: <strong>{{ child.country.name }}</strong>
+                                        </p>
+                                    </div>
                                 </div>
-                                <div class="card-footer">
-                                    <a href="#" class="btn btn-primary">Learn More</a>
-                                </div>
-                            </div>
+                            </a>
                         </div>
                     {% endfor %}
                 </div>
