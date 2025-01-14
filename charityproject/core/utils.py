@@ -26,7 +26,7 @@ def track_user_with_session(request, event):
     if not session_key:
         request.session.create()
         session_key = request.session.session_key
-    
+
     # Log the event
     msg = f"[{event}] Session Key: {session_key}, Accessed Path: {request.path}, Time: {now()}"
     print(color_style().SUCCESS(msg))

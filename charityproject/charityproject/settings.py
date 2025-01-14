@@ -37,6 +37,7 @@ INSTALLED_APPS = [
     "core.apps.CoreConfig",
     "faqs.apps.FaqsConfig",
     "sponsors.apps.SponsorsConfig",
+    "semanticsearch.apps.SemanticsearchConfig",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
