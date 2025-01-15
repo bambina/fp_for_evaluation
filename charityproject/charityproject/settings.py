@@ -11,6 +11,9 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
 from pathlib import Path
+import os
+from dotenv import load_dotenv
+from platformdirs import user_cache_dir
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -28,10 +31,38 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
+# Load environment variables from .env file
+load_dotenv()
+KAGGLE_USERNAME = os.getenv("KAGGLE_USERNAME")
+KAGGLE_KEY = os.getenv("KAGGLE_KEY")
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+
+# Cache directory
+CACHE_DIR = Path(os.getenv("CACHE_DIR", os.path.expanduser("~/.cache")))
+
+USE_MODEL_DIR = str(
+    CACHE_DIR
+    / "kagglehub"
+    / "models"
+    / "google"
+    / "universal-sentence-encoder"
+    / "tensorFlow2"
+    / "multilingual"
+    / "2"
+)
+
+VECTOR_DB_FILE = str(BASE_DIR / "npo_chatbot.db")
+
+DATA_FILE = str(BASE_DIR / "data.yaml")
+
+REDIS_CHAT_HISTORY_URL = os.getenv(
+    "REDIS_CHAT_HISTORY_URL", f"redis://localhost:6379/0"
+)
 
 # Application definition
 
 INSTALLED_APPS = [
+    "daphne",
     "django_bootstrap5",
     "django_bootstrap_icons",
     "core.apps.CoreConfig",
@@ -75,8 +106,18 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = "charityproject.wsgi.application"
+# WSGI_APPLICATION = "charityproject.wsgi.application"
 
+# Channels
+ASGI_APPLICATION = "charityproject.asgi.application"
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [("127.0.0.1", 6379, 1)],
+        },
+    },
+}
 
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
