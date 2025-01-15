@@ -3,6 +3,7 @@ from django.apps import AppConfig
 import os, sys
 from semanticsearch.services import *
 
+
 class SemanticsearchConfig(AppConfig):
     default_auto_field = "django.db.models.BigAutoField"
     name = "semanticsearch"

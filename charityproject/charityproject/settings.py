@@ -51,9 +51,7 @@ USE_MODEL_DIR = str(
     / "2"
 )
 
-VECTOR_DB_FILE = str(BASE_DIR / "npo_chatbot.db")
-
-DATA_FILE = str(BASE_DIR / "data.yaml")
+VECTOR_DB_FILE = str(BASE_DIR / "charity_chatbot.db")
 
 REDIS_CHAT_HISTORY_URL = os.getenv(
     "REDIS_CHAT_HISTORY_URL", f"redis://localhost:6379/0"

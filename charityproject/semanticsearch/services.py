@@ -59,7 +59,7 @@ class MilvusClientService:
             cls.init_client()
 
         return cls._client.hybrid_search(
-            collection_name=COLLECTION_NAME,
+            collection_name=FAQ_COLLECTION_NAME,
             reqs=[
                 AnnSearchRequest(
                     data=query_vectors,

@@ -5,6 +5,7 @@ from core.constants import *
 
 # Regex-based validators
 max_length_255_validator = RegexValidator(r"^.{1,255}$", MAX_LENGTH_255_INVALID_ERR)
+max_length_2048_validator = RegexValidator(r"^.{1,2048}$", MAX_LENGTH_2048_INVALID_ERR)
 max_length_50_validator = RegexValidator(r"^.{1,50}$", MAX_LENGTH_50_INVALID_ERR)
 
 alpha_2_code_validator = RegexValidator(
