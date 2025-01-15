@@ -21,5 +21,3 @@ class SemanticsearchConfig(AppConfig):
                 print("ready method called")
                 USEModelService.load_model()
                 MilvusClientService.init_client()
-                OpenAIClientService.init_client()
-                RedisChatHistoryService.init_redis()
