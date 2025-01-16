@@ -41,7 +41,7 @@ Your response should:
 - Strictly use the information provided about the child.
 - Avoid adding any additional details or making inferences beyond what is provided.
 - Conclude your response with a sentence providing a clickable HTML link to learn more about the child and how to support them.
-- Do not use Markdown formatting (e.g., brackets or parentheses) or plain text for the link. Instead, use an HTML `<a>` tag. For example: 'To learn more about [child's name] and how you can support them, please visit this link: <a href="[child's link]">[child's link]</a>'.
+- Do not use Markdown formatting (e.g., brackets or parentheses) or plain text for the link. Instead, use an HTML `<a>` tag and include the `target="_blank"` attribute to ensure it opens in a new tab or window. For example: 'To learn more about [child's name] and how you can support them, please visit this link: <a href="[child's link]" target="_blank">[child's link]</a>'.
 
 
 
@@ -54,14 +54,14 @@ TOOLS = [
     {
         "type": "function",
         "function": {
-            "name": "search_vector_db",
-            "description": "Search the vector database for related documents based on the query.",
+            "name": "search_relevant_faqs",
+            "description": "Search the vector database for the most relevant FAQ entries based on the user's query. Each FAQ entry consists of a question and an answer, and the query is compared against both to retrieve the best matches.",
             "parameters": {
                 "type": "object",
                 "properties": {
                     "query": {
                         "type": "string",
-                        "description": "The search query to use.",
+                        "description": "The user's search query, which will be used to find relevant FAQ entries.",
                     },
                 },
                 "required": ["query"],

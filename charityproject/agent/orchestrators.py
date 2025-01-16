@@ -24,7 +24,7 @@ class OpenAIInteractionOrchestrator:
             function_name = tool_function.name
             arguments = ast.literal_eval(tool_function.arguments)
             # Search for data relevant to the charity
-            if function_name == "search_vector_db":
+            if function_name == "search_relevant_faqs":
                 query = arguments.get("query")
                 query_vectors = USEModelService.get_vector_representation([query])
                 result = MilvusClientService.hybrid_search(query_vectors)
