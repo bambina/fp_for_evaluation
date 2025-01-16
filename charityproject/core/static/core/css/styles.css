@@ -1,23 +1,8 @@
-/* Blinking animation */
-@keyframes blink {
-    0%,100% {
-        opacity: 1;
-    }
-    50% {
-        opacity: 0.4;
-    }
-}
-
-.blink {
-  animation: blink 2s ease-in-out infinite;
-}
-
-/* Common */
+/* Top page */
 .text-shadow-lg {
     text-shadow: 2px 3px 4px rgba(0, 0, 0, 0.75);
 }
 
-/* Top page */
 .hero-section {
     background-image: url('../images/top.jpg');
     background-size: cover;
@@ -25,11 +10,4 @@
     background-repeat: no-repeat;
     color: white;
     width: 100%;
-}
-
-/* Sponsor page */
-.child-image {
-    width: 100%;
-    height: auto;
-    object-fit: cover;
 }

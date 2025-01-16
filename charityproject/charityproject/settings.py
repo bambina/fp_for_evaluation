@@ -13,7 +13,6 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 from pathlib import Path
 import os
 from dotenv import load_dotenv
-from platformdirs import user_cache_dir
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -25,6 +24,9 @@ DATA_DIR = BASE_DIR / "data"
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = "django-insecure-31459819no7106%&9wee@)k4i+gh_pon4^3l6rg0c(x=7-s@*("
+
+# SECRET_KEY for chat session ID generation
+SESSION_ID_SECRET = os.getenv("SESSION_ID_SECRET", "insecure-secret")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -56,6 +58,8 @@ VECTOR_DB_FILE = str(BASE_DIR / "charity_chatbot.db")
 REDIS_CHAT_HISTORY_URL = os.getenv(
     "REDIS_CHAT_HISTORY_URL", f"redis://localhost:6379/0"
 )
+
+BS_ICONS_BASE_URL = "https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/"
 
 # Application definition
 

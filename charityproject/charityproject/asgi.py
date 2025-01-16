@@ -18,17 +18,17 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "charityproject.settings")
 application = get_asgi_application()
 
 # Load the routing configuration after the Django app is loaded
-# from agent.routing import websocket_urlpatterns
+from agent.routing import websocket_urlpatterns
 
 application = ProtocolTypeRouter(
     {
         "http": application,
-        # "websocket": AllowedHostsOriginValidator(  # Confirm that incoming WebSocket connections are from an allowed host
-        #     # Add an authentication layer to WebSocket connections
-        #     AuthMiddlewareStack(
-        #         # Define the routing configuration for WebSocket connections
-        #         URLRouter(websocket_urlpatterns)
-        #     )
-        # ),
+        "websocket": AllowedHostsOriginValidator(  # Confirm that incoming WebSocket connections are from an allowed host
+            # Add an authentication layer to WebSocket connections
+            AuthMiddlewareStack(
+                # Define the routing configuration for WebSocket connections
+                URLRouter(websocket_urlpatterns)
+            )
+        ),
     }
 )
