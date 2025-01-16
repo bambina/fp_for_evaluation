@@ -28,6 +28,8 @@ class OpenAIInteractionOrchestrator:
                 query = arguments.get("query")
                 query_vectors = USEModelService.get_vector_representation([query])
                 result = MilvusClientService.hybrid_search(query_vectors)
+                print(f"\nQuery: {query}\n")
+                print(f"\nSearch result: {result}\n")
                 system_content = OpenAIClientService.compose_relevant_docs(result)
                 # Get a completion from the OpenAI model using the retrieved data
                 completion = OpenAIClientService.chat_completion(
