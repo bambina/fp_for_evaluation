@@ -32,8 +32,8 @@ class OpenAIInteractionOrchestrator:
                 result = MilvusClientService.hybrid_search(query_vectors)
                 # print(f"\nQuery: {query}\n")
                 # print(f"\nSearch result: {result}\n")
-                log_search_and_child_functions(f"\nQuery: {query}\n")
-                log_search_and_child_functions(f"\nSearch result: {result}\n")
+                log_search_and_child_functions(f"Query: {query}\n")
+                log_search_and_child_functions(f"Search result: {result}\n")
                 system_content = OpenAIClientService.compose_relevant_docs(result)
                 # Get a completion from the OpenAI model using the retrieved data
                 completion = OpenAIClientService.chat_completion(
@@ -51,8 +51,8 @@ class OpenAIInteractionOrchestrator:
                 )
                 # print(f"\nfilters: {filters}\n")
                 # print(f"\nChild: {child}\n")
-                log_search_and_child_functions(f"\nfilters: {filters}\n")
-                log_search_and_child_functions(f"\nChild: {child}\n")
+                log_search_and_child_functions(f"filters: {filters}\n")
+                log_search_and_child_functions(f"Child: {child}\n")
                 child_found = True
                 if not child:
                     child_found = False
@@ -77,7 +77,7 @@ class OpenAIInteractionOrchestrator:
                 return f"OpenAI model wants to call a function not defined: {function_name}"
         else:
             # print(f"\nFinish reason: {finish_reason}\n")
-            log_search_and_child_functions(f"\nFinish reason: {finish_reason}\n")
+            log_search_and_child_functions(f"Finish reason: {finish_reason}\n")
 
         return {
             "model": completion.model,

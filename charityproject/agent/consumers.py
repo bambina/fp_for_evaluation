@@ -10,6 +10,7 @@ from agent.utils import *
 from agent.services import *
 from semanticsearch.services import *
 from agent.orchestrators import *
+from core.utils import *
 
 logger = logging.getLogger(__name__)
 
@@ -55,6 +56,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
             RedisChatHistoryService.save_message(
                 self.room_name, sender, message, timezone.now().isoformat()
             )
+            log_search_and_child_functions(f"User message: {message}")
             # Load chat history from Redis
             chat_history = RedisChatHistoryService.get_chat_history(self.room_name)
             # Generate response using OpenAI API
@@ -70,6 +72,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
             RedisChatHistoryService.save_message(
                 self.room_name, "assistant", res_message, timezone.now().isoformat()
             )
+            log_search_and_child_functions(f"Assistant message: {res_message}")
         except json.JSONDecodeError:
             logger.error(ERR_INVALID_JSON, exc_info=True)
         except Exception as e:
