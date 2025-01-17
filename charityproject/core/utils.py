@@ -2,6 +2,9 @@
 from django.core.management.color import color_style
 
 from django.utils.timezone import now
+import logging
+
+usertest_logger = logging.getLogger("usertest")
 
 
 def write_success(stdout, style, msg):
@@ -29,4 +32,13 @@ def track_user_with_session(request, event):
 
     # Log the event
     msg = f"[{event}] Session Key: {session_key}, Accessed Path: {request.path}, Time: {now()}"
-    print(color_style().SUCCESS(msg))
+    usertest_logger.info(msg)
+
+    print(msg)
+
+
+def log_search_and_child_functions(text):
+    """
+    Log messages for search and child-related functions.
+    """
+    usertest_logger.info(text)

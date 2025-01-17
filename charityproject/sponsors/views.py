@@ -44,6 +44,9 @@ def child_list(request):
 
 def child_detail(request, pk):
     """Detail view for a specific child."""
+    # Track user with session key
+    track_user_with_session(request, event=f"Viewed Child Detail. Child ID: {pk}")
+
     # Get the child object or return 404
     child = get_object_or_404(Child, pk=pk)
 
@@ -62,8 +65,13 @@ def child_detail(request, pk):
 def sponsor_me_button_click(request, child_id):
     """Handle Sponsor Me button click event."""
     if request.method == "POST":
-        track_user_with_session(request, f"Clicked Sponsor Me Button")
-        messages.success(request, "Thank you for participating in the experiment!")
+        track_user_with_session(
+            request, f"Clicked Sponsor Me Button for Child ID: {child_id}"
+        )
+        messages.success(
+            request,
+            "Thank you for your kindness! Your support helps create brighter futures.",
+        )
 
         # Redirect to the child detail page
         return redirect("sponsors:child_detail", pk=child_id)

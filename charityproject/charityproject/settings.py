@@ -180,3 +180,33 @@ MEDIA_ROOT = BASE_DIR / "media"
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {
+        "verbose": {
+            "format": "{levelname} {asctime} {module} {message}",
+            "style": "{",
+        },
+        "simple": {
+            "format": "{message}",
+            "style": "{",
+        },
+    },
+    "handlers": {
+        "usertest_file": {
+            "level": "INFO",  # 必要なレベルに調整
+            "class": "logging.FileHandler",
+            "filename": "usertest.log",  # 出力ファイル名
+            "formatter": "verbose",
+        },
+    },
+    "loggers": {
+        "usertest": {  # ユーザーテスト専用ロガー
+            "handlers": ["usertest_file"],
+            "level": "INFO",
+            "propagate": False,
+        },
+    },
+}

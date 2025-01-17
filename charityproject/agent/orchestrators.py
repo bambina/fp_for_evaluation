@@ -8,6 +8,7 @@ from sponsors.models import Child
 from agent.constants import *
 from agent.services import *
 from semanticsearch.services import *
+from core.utils import log_search_and_child_functions
 
 
 class OpenAIInteractionOrchestrator:
@@ -31,6 +32,8 @@ class OpenAIInteractionOrchestrator:
                 result = MilvusClientService.hybrid_search(query_vectors)
                 # print(f"\nQuery: {query}\n")
                 # print(f"\nSearch result: {result}\n")
+                log_search_and_child_functions(f"\nQuery: {query}\n")
+                log_search_and_child_functions(f"\nSearch result: {result}\n")
                 system_content = OpenAIClientService.compose_relevant_docs(result)
                 # Get a completion from the OpenAI model using the retrieved data
                 completion = OpenAIClientService.chat_completion(
@@ -46,8 +49,10 @@ class OpenAIInteractionOrchestrator:
                     .select_related("country", "gender")
                     .afirst()
                 )
-                print(f"\nfilters: {filters}\n")
-                print(f"\nChild: {child}\n")
+                # print(f"\nfilters: {filters}\n")
+                # print(f"\nChild: {child}\n")
+                log_search_and_child_functions(f"\nfilters: {filters}\n")
+                log_search_and_child_functions(f"\nChild: {child}\n")
                 child_found = True
                 if not child:
                     child_found = False
@@ -63,7 +68,7 @@ class OpenAIInteractionOrchestrator:
                 system_content = OpenAIClientService.compose_child_introduction(
                     child, child_found
                 )
-                print(f"\nSystem content: {system_content}\n")
+                # print(f"\nSystem content: {system_content}\n")
                 # Use ChatGPT to format the search result
                 completion = OpenAIClientService.chat_completion(
                     USE_INEXPENSIVE_MODEL, system_content, chat_history, NOT_GIVEN
@@ -71,7 +76,8 @@ class OpenAIInteractionOrchestrator:
             else:
                 return f"OpenAI model wants to call a function not defined: {function_name}"
         else:
-            print(f"\nFinish reason: {finish_reason}\n")
+            # print(f"\nFinish reason: {finish_reason}\n")
+            log_search_and_child_functions(f"\nFinish reason: {finish_reason}\n")
 
         return {
             "model": completion.model,

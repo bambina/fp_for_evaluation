@@ -3,6 +3,14 @@
 {% block content %}
     <div class="container py-3 mt-5">
         <div class="mt-5 row justify-content-center">
+            {% if messages %}
+                <div class="container mt-4">
+                    {% for message in messages %}
+                        <div class="alert {% if message.tags %}alert-{{ message.tags }}{% else %}alert-info{% endif %}"
+                             role="alert">{{ message }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
             <div class="col-9">
                 <div class="row">
                     <!-- Child's photo -->
