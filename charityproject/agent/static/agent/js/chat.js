@@ -3,7 +3,7 @@
 // The following variables are passed from the Django template:
 const hostName = JSON.parse(document.getElementById("host-name").textContent);
 const roonName = JSON.parse(document.getElementById("room-name").textContent);
-const url = `wss://${hostName}/ws/chat/${roonName}/`;
+const url = `ws://${hostName}/ws/chat/${roonName}/`;
 const MESSAGE_TYPE_CLOSE = "close.connection";
 const MESSAGE_TYPE_QUESTION = "question.message";
 const MESSAGE_TYPE_ASSISTANT = "assistant.message";

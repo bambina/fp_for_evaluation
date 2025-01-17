@@ -5,7 +5,7 @@
             <a href="/"
                class="d-flex align-items-center mb-2 mb-lg-0 text-white text-decoration-none">
                 {% bs_icon 'box2-heart-fill' size='1.5em' extra_classes='me-2' %}
-                <span class="fs-4">Sponsor A Child</span>
+                <span class="fs-4">The Virtual Charity</span>
             </a>
             <ul class="nav col-12 col-lg-auto mb-2 justify-content-center mb-md-0 ms-auto">
                 <li>
@@ -21,6 +21,10 @@
                 <li>
                     <a href="{% url 'sponsors:child_list' %}"
                        class="nav-link px-2 {% if request.resolver_match.namespace == 'sponsors' and request.resolver_match.url_name == 'child_list' %}text-secondary{% else %}text-white{% endif %}">Sponsor a Child</a>
+                </li>
+                <li>
+                    <a href="{% url 'start-chat' %}"
+                       class="nav-link px-2 {% if request.resolver_match.url_name == 'start-chat' %}text-secondary{% else %}text-white{% endif %}">Chat with Nico</a>
                 </li>
             </ul>
         </div>

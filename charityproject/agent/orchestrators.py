@@ -70,6 +70,9 @@ class OpenAIInteractionOrchestrator:
                 )
             else:
                 return f"OpenAI model wants to call a function not defined: {function_name}"
+        else:
+            print(f"\nFinish reason: {finish_reason}\n")
+
         return {
             "model": completion.model,
             "total_tokens": completion.usage.total_tokens,
