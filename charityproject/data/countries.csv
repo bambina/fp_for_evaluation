@@ -6,6 +6,7 @@ numeric_code,code,name
 320,GT,Guatemala
 324,GN,Guinea
 332,HT,Haiti
+340,HN,Honduras
 360,ID,Indonesia
 404,KE,Kenya
 484,MX,Mexico
@@ -14,5 +15,7 @@ numeric_code,code,name
 686,SN,Senegal
 694,SL,Sierra Leone
 144,LK,Sri Lanka
+270,GM,The Gambia
+840,US,USA
 800,UG,Uganda
 894,ZM,Zambia

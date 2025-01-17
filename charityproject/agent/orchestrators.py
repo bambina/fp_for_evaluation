@@ -1,4 +1,5 @@
 import ast
+from datetime import datetime
 
 from openai import NOT_GIVEN
 
@@ -28,8 +29,8 @@ class OpenAIInteractionOrchestrator:
                 query = arguments.get("query")
                 query_vectors = USEModelService.get_vector_representation([query])
                 result = MilvusClientService.hybrid_search(query_vectors)
-                print(f"\nQuery: {query}\n")
-                print(f"\nSearch result: {result}\n")
+                # print(f"\nQuery: {query}\n")
+                # print(f"\nSearch result: {result}\n")
                 system_content = OpenAIClientService.compose_relevant_docs(result)
                 # Get a completion from the OpenAI model using the retrieved data
                 completion = OpenAIClientService.chat_completion(
@@ -45,7 +46,24 @@ class OpenAIInteractionOrchestrator:
                     .select_related("country", "gender")
                     .afirst()
                 )
-                system_content = OpenAIClientService.compose_child_introduction(child)
+                print(f"\nfilters: {filters}\n")
+                print(f"\nChild: {child}\n")
+                child_found = True
+                if not child:
+                    child_found = False
+                    random_birth_month = (datetime.now().second % 12) + 1
+                    child = (
+                        await Child.objects.filter(
+                            date_of_birth__month=random_birth_month
+                        )
+                        .select_related("country", "gender")
+                        .afirst()
+                    )
+
+                system_content = OpenAIClientService.compose_child_introduction(
+                    child, child_found
+                )
+                print(f"\nSystem content: {system_content}\n")
                 # Use ChatGPT to format the search result
                 completion = OpenAIClientService.chat_completion(
                     USE_INEXPENSIVE_MODEL, system_content, chat_history, NOT_GIVEN
@@ -64,10 +82,18 @@ class OpenAIInteractionOrchestrator:
         Build filters for fetching a child in the Sponsor a Child program.
         """
         filters = {}
+        if "gender" in arguments and arguments["gender"]:
+            filters["gender__name__iexact"] = arguments["gender"]
         if "country" in arguments and arguments["country"]:
             filters["country"] = arguments["country"]
-        if "age" in arguments and arguments["age"]:
-            filters["age"] = arguments["age"]
+        if "min_age" in arguments and arguments["min_age"] is not None:
+            filters["age__gte"] = arguments["min_age"]
+        if "max_age" in arguments and arguments["max_age"] is not None:
+            filters["age__lte"] = arguments["max_age"]
+        if "birth_month" in arguments and arguments["birth_month"] is not None:
+            filters["date_of_birth__month"] = arguments["birth_month"]
+        if "birth_day" in arguments and arguments["birth_day"] is not None:
+            filters["date_of_birth__day"] = arguments["birth_day"]
         if "profile_description" in arguments and arguments["profile_description"]:
             filters["profile_description__icontains"] = arguments["profile_description"]
         print(f"\nFilters: {filters}\n")

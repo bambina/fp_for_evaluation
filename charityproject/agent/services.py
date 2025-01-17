@@ -63,18 +63,21 @@ class OpenAIClientService:
         return SYSTEM_CONTENT_2 + docs
 
     @classmethod
-    def compose_child_introduction(cls, child_data):
+    def compose_child_introduction(cls, child_data, is_found):
         child_url = reverse("sponsors:child_detail", kwargs={"pk": child_data.id})
         child_info = (
             f"Name: {child_data.name}\n"
             f"Age: {child_data.age}\n"
+            f"Date of Birth: {child_data.date_of_birth}\n"
             f"Gender: {child_data.gender}\n"
             f"Country: {child_data.country}\n"
             f"Profile Description: {child_data.profile_description}\n"
-            f"Date of Birth: {child_data.date_of_birth}\n"
             f"Link: {child_url}"
         )
-        return SYSTEM_CONTENT_3 + child_info
+        if is_found:
+            return SYSTEM_CONTENT_3 + child_info
+        else:
+            return SYSTEM_CONTENT_4 + child_info
 
     @classmethod
     def compose_messages(cls, system_content, user_content):

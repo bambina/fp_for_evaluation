@@ -23,7 +23,7 @@ Thank you for visiting this charity's website—your support means the world to 
 SYSTEM_CONTENT_1 = """
 You are an assistant for an NPO website. Determine if the user's query requires using a specific function to provide relevant information.
 - If the query is general or conversational (e.g., greetings), respond directly without using any function.
-- If the query is informational and relevant to the NPO's services (e.g., donation methods, activities), use the "search_vector_db" function to retrieve information from the documents.
+- If the query is informational and relevant to the NPO's services (e.g., donation methods, activities), use the "search_relevant_faqs" function to retrieve information from the documents.
 - If the query is related to finding a specific child to support based on attributes (e.g., "I want to sponsor a child from Kenya" or "Who loves football?"), use the "fetch_child" function to find matching children.
 """
 SYSTEM_CONTENT_2 = """You are an assistant for an NPO website, providing answers strictly based on the information provided.
@@ -37,19 +37,38 @@ SYSTEM_CONTENT_3 = """You are an assistant for an NPO website, responsible for i
 Using the details of the child retrieved from the database, create a warm and engaging introduction that highlights the child's name, age, country, and any specific preferences or hobbies they have.
 
 Your response should:
-- Be friendly and encouraging to help the sponsor feel connected to the child.
-- Strictly use the information provided about the child.
+- Be warm, friendly, and engaging to make the sponsor feel emotionally connected to the child.
+- Use the information provided about the child as a basis, but feel free to expand with generic encouraging phrases or a natural flow to enhance the sponsor's connection.
 - Avoid adding any additional details or making inferences beyond what is provided.
 - Conclude your response with a sentence providing a clickable HTML link to learn more about the child and how to support them.
-- Do not use Markdown formatting (e.g., brackets or parentheses) or plain text for the link. Instead, use an HTML `<a>` tag and include the `target="_blank"` attribute to ensure it opens in a new tab or window. For example: 'To learn more about [child's name] and how you can support them, please visit this link: <a href="[child's link]" target="_blank">[child's link]</a>'.
-
-
+- Do not use Markdown formatting (e.g., brackets or parentheses) or plain text for the link. Instead, use an HTML `<a>` tag with the `target="_blank"` attribute. For example: 'To learn more about [child's name] and how you can support them, please visit this link: <a href="[child's link]" target="_blank">[child's link]</a>'.
 
 - Do not include any follow-up questions such as "Would you like to learn more about sponsoring [child's name]?" or similar phrases.
 
 Here is the information about the child:
 
 """
+SYSTEM_CONTENT_4 = """You are an assistant for an NPO website, responsible for introducing children to potential sponsors based on the provided information.
+
+Unfortunately, we couldn't find a child matching your specific preferences at this time. However, we have identified another child who might capture your interest and support.
+
+Using the details of this alternative child retrieved from the database, create a warm and engaging introduction that highlights the child's name, age, country, and any specific preferences or hobbies they have.
+
+Your response should:
+- Acknowledge that the initially requested child was not found, and that this is an alternative suggestion.
+- Be friendly and encouraging to help the sponsor feel connected to this alternative child.
+- Strictly use the information provided about the child.
+- Avoid adding any additional details or making inferences beyond what is provided.
+- Conclude your response with a sentence providing a clickable HTML link to learn more about the child and how to support them.
+- Do not use Markdown formatting (e.g., brackets or parentheses) or plain text for the link. Instead, use an HTML `<a>` tag with the `target="_blank"` attribute. For example: 'To learn more about [child's name] and how you can support them, please visit this link: <a href="[child's link]" target="_blank">[child's link]</a>'.
+
+- Do not include any follow-up questions such as "Would you like to learn more about sponsoring [child's name]?" or similar phrases.
+
+Here is the information about the alternative child:
+
+"""
+
+
 TOOLS = [
     {
         "type": "function",
@@ -78,11 +97,15 @@ TOOLS = [
                 "properties": {
                     "gender": {
                         "type": "string",
-                        "description": "The preferred gender of the child (e.g., 'male', 'female'). Leave blank if not specified.",
+                        "description": "The preferred gender of the child. Options are 'female', 'male', or 'other'. Leave blank or omit this field if no preference.",
                     },
-                    "age": {
+                    "min_age": {
                         "type": "integer",
-                        "description": "The preferred age of the child. Leave blank if not specified.",
+                        "description": "The minimum preferred age of the child. Leave blank if not specified.",
+                    },
+                    "max_age": {
+                        "type": "integer",
+                        "description": "The maximum preferred age of the child. Leave blank if not specified.",
                     },
                     "country": {
                         "type": "string",
@@ -91,6 +114,18 @@ TOOLS = [
                     "profile_description": {
                         "type": "string",
                         "description": "Keywords or interests to match in the child's profile description. Leave blank if not specified.",
+                    },
+                    "birth_month": {
+                        "type": "integer",
+                        "description": "The birth month of the child (1 for January, 2 for February, etc.). Leave blank if not specified.",
+                        "minimum": 1,
+                        "maximum": 12,
+                    },
+                    "birth_day": {
+                        "type": "integer",
+                        "description": "The birth day of the child (1 to 31, depending on the month). Leave blank if not specified.",
+                        "minimum": 1,
+                        "maximum": 31,
                     },
                 },
                 "required": [],

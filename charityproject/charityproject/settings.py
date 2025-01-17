@@ -33,6 +33,9 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
+if DEBUG:
+    ALLOWED_HOSTS = ["*"]
+
 # Load environment variables from .env file
 load_dotenv()
 KAGGLE_USERNAME = os.getenv("KAGGLE_USERNAME")
