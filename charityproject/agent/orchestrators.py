@@ -43,8 +43,8 @@ class OpenAIInteractionOrchestrator:
             # Search for a child in the Sponsor a Child program
             elif function_name == "fetch_child":
                 # Build filters for fetching a child
-                filters, num_children = OpenAIInteractionOrchestrator.build_child_filters(
-                    arguments
+                filters, num_children = (
+                    OpenAIInteractionOrchestrator.build_child_filters(arguments)
                 )
                 # Fetch child based on attributes
                 children = []

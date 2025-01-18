@@ -64,6 +64,14 @@ class ChildSearchForm(forms.Form):
         widget=forms.Select(attrs=form_control_class),
     )
 
+    keywords = forms.CharField(
+        required=False,
+        label="Keywords",
+        widget=forms.TextInput(
+            attrs={"placeholder": "Search by name or profile", **form_control_class}
+        ),
+    )
+
     def clean(self):
         """Validate form data before processing."""
         cleaned_data = super().clean()

@@ -23,13 +23,21 @@ class ChildRepository:
         max_age=None,
         birth_month=None,
         birth_day=None,
+        keywords=None,
     ) -> QuerySet[Child]:
         """Fetch children that match the given filters."""
         # Base queryset with related fields and necessary attributes
         queryset = (
             Child.objects.filter(deleted_at__isnull=True)
             .select_related("country", "gender")
-            .only("name", "country", "gender", "age", "date_of_birth")
+            .only(
+                "name",
+                "country",
+                "gender",
+                "age",
+                "date_of_birth",
+                "profile_description",
+            )
         )
 
         # Apply filters
@@ -39,8 +47,22 @@ class ChildRepository:
         queryset = ChildRepository.apply_birth_date_filter(
             queryset, birth_month, birth_day
         )
+        queryset = ChildRepository.apply_keywords_filter(queryset, keywords)
 
         # Return the filtered queryset
+        return queryset
+
+    @staticmethod
+    def apply_keywords_filter(queryset, keywords):
+        """Filter by multiple keywords in name or profile description."""
+        if keywords:
+            keyword_list = keywords.split()
+
+            for keyword in keyword_list:
+                queryset = queryset.filter(
+                    Q(name__icontains=keyword)
+                    | Q(profile_description__icontains=keyword)
+                )
         return queryset
 
     @staticmethod
