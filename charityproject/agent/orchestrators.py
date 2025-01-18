@@ -4,6 +4,7 @@ from datetime import datetime
 from openai import NOT_GIVEN
 
 from sponsors.models import Child
+from django.db.models import Q
 
 from agent.constants import *
 from agent.services import *
@@ -45,7 +46,7 @@ class OpenAIInteractionOrchestrator:
                 filters = OpenAIInteractionOrchestrator.build_child_filters(arguments)
                 # Fetch child based on attributes
                 child = (
-                    await Child.objects.filter(**filters)
+                    await Child.objects.filter(filters)
                     .select_related("country", "gender")
                     .afirst()
                 )
@@ -91,10 +92,12 @@ class OpenAIInteractionOrchestrator:
         Build filters for fetching a child in the Sponsor a Child program.
         """
         filters = {}
+        profile_q = Q()
+        print(f"\nArguments: {arguments}\n")
         if "gender" in arguments and arguments["gender"]:
             filters["gender__name__iexact"] = arguments["gender"]
         if "country" in arguments and arguments["country"]:
-            filters["country"] = arguments["country"]
+            filters["country__name__iexact"] = arguments["country"]
         if "min_age" in arguments and arguments["min_age"] is not None:
             filters["age__gte"] = arguments["min_age"]
         if "max_age" in arguments and arguments["max_age"] is not None:
@@ -104,6 +107,9 @@ class OpenAIInteractionOrchestrator:
         if "birth_day" in arguments and arguments["birth_day"] is not None:
             filters["date_of_birth__day"] = arguments["birth_day"]
         if "profile_description" in arguments and arguments["profile_description"]:
-            filters["profile_description__icontains"] = arguments["profile_description"]
-        print(f"\nFilters: {filters}\n")
-        return filters
+            keywords = arguments["profile_description"].split()
+            for keyword in keywords:
+                profile_q &= Q(profile_description__icontains=keyword)
+        final_q = Q(**filters) & profile_q if profile_q else Q(**filters)
+        print(f"\nFilters: {final_q}\n")
+        return final_q
