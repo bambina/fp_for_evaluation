@@ -149,6 +149,12 @@ TOOLS = [
                         "minimum": 1,
                         "maximum": 31,
                     },
+                    "num_children": {
+                        "type": "integer",
+                        "description": "The number of children to fetch. Leave blank if not specified.",
+                        "minimum": 1,
+                        "maximum": 3,
+                    },
                 },
                 "required": [],
             },

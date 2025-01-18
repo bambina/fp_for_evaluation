@@ -33,8 +33,8 @@ class OpenAIInteractionOrchestrator:
                 result = MilvusClientService.hybrid_search(query_vectors)
                 # print(f"\nQuery: {query}\n")
                 # print(f"\nSearch result: {result}\n")
-                log_search_and_child_functions(f"Query: {query}\n")
-                log_search_and_child_functions(f"Search result: {result}\n")
+                # log_search_and_child_functions(f"Query: {query}\n")
+                # log_search_and_child_functions(f"Search result: {result}\n")
                 system_content = OpenAIClientService.compose_relevant_docs(result)
                 # Get a completion from the OpenAI model using the retrieved data
                 completion = OpenAIClientService.chat_completion(
@@ -43,17 +43,22 @@ class OpenAIInteractionOrchestrator:
             # Search for a child in the Sponsor a Child program
             elif function_name == "fetch_child":
                 # Build filters for fetching a child
-                filters = OpenAIInteractionOrchestrator.build_child_filters(arguments)
-                # Fetch child based on attributes
-                child = (
-                    await Child.objects.filter(filters)
-                    .select_related("country", "gender")
-                    .afirst()
+                filters, num_children = OpenAIInteractionOrchestrator.build_child_filters(
+                    arguments
                 )
-                # print(f"\nfilters: {filters}\n")
-                # print(f"\nChild: {child}\n")
-                log_search_and_child_functions(f"filters: {filters}\n")
-                log_search_and_child_functions(f"Child: {child}\n")
+                # Fetch child based on attributes
+                children = []
+                async for child in (
+                    Child.objects.filter(filters)
+                    .select_related("country", "gender")
+                    .all()[:num_children]
+                ):
+                    children.append(child)
+                print(f"\nfilters: {filters}\n")
+                print(f"\nN: {num_children}\n")
+                print(f"\nChild: {children}\n")
+                # log_search_and_child_functions(f"filters: {filters}\n")
+                # log_search_and_child_functions(f"Child: {child}\n")
                 child_found = True
                 if not child:
                     child_found = False
@@ -93,7 +98,10 @@ class OpenAIInteractionOrchestrator:
         """
         filters = {}
         profile_q = Q()
+        num_children = 1
         print(f"\nArguments: {arguments}\n")
+        if "num_children" in arguments and arguments["num_children"]:
+            num_children = arguments["num_children"]
         if "gender" in arguments and arguments["gender"]:
             filters["gender__name__iexact"] = arguments["gender"]
         if "country" in arguments and arguments["country"]:
@@ -112,4 +120,4 @@ class OpenAIInteractionOrchestrator:
                 profile_q &= Q(profile_description__icontains=keyword)
         final_q = Q(**filters) & profile_q if profile_q else Q(**filters)
         print(f"\nFilters: {final_q}\n")
-        return final_q
+        return final_q, num_children
