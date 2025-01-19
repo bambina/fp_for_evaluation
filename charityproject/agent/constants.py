@@ -3,7 +3,8 @@ ERR_UNEXPECTED_LOG = "Unexpected error occurred: {error}."
 MESSAGE_TYPE_ASSISTANT = "assistant.message"
 MESSAGE_TYPE_ERROR = "error.message"
 ERR_MSG_UNEXPECTED = "Unexpected error occurred. We apologize for the inconvenience. Please try again after a while."
-
+UNAUTHORIZED_ACCESS_CODE = 4001
+SENDER_ASSISTANT = "assistant"
 
 # OpenAI API - prompt templates
 # https://platform.openai.com/docs/models/models-overview
@@ -11,7 +12,7 @@ USE_INEXPENSIVE_MODEL = "gpt-3.5-turbo"
 AVAILABLE_MODELS = ["gpt-4o", "gpt-4o-mini", "gpt-4-turbo", "gpt-3.5-turbo"]
 RELEVANT_DOCS_FORMAT = "Questioin:{question}\nAnswer:{answer}\n\n"
 
-SYSTEM_CONTENT_0 = """Hi, I'm Nico, your assistant for The Virtual Charity!
+INITIAL_MSG = """Hi, I'm Nico, your assistant for The Virtual Charity!
 I'm here to support you by answering questions about our mission, activities, and donation methods.
 If you're interested in sponsoring a child, I can help you find the perfect match.
 

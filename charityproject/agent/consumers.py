@@ -20,22 +20,22 @@ class ChatConsumer(AsyncWebsocketConsumer):
         """Connection event handler provided by AsyncWebsocketConsumer."""
         print("Connected")
         self.room_name = self.scope["url_route"]["kwargs"]["room_name"]
-        self.room_group_name = f"some_prefix_{self.room_name}"
+        self.room_group_name = f"chat_{self.room_name}"
         # Verify session ID
         if not verify_session_id(self.room_name):
             print(f"Invalid session ID attempted: {self.room_name}")
-            await self.close(code=4001)
+            await self.close(code=UNAUTHORIZED_ACCESS_CODE)
             return
         # Join room group
         await self.channel_layer.group_add(self.room_group_name, self.channel_name)
         await self.accept()
         # Send a welcome message to the user
         await self.send_message_to_group(
-            MESSAGE_TYPE_ASSISTANT, SYSTEM_CONTENT_0, "assistant", timezone.now()
+            MESSAGE_TYPE_ASSISTANT, INITIAL_MSG, SENDER_ASSISTANT, timezone.now()
         )
         # Save assistant message to Redis
         RedisChatHistoryService.save_message(
-            self.room_name, "assistant", SYSTEM_CONTENT_0, timezone.now().isoformat()
+            self.room_name, SENDER_ASSISTANT, INITIAL_MSG, timezone.now().isoformat()
         )
 
     async def disconnect(self, close_code):
@@ -66,11 +66,11 @@ class ChatConsumer(AsyncWebsocketConsumer):
             res_message = response["content"]
             if res_message:
                 await self.send_message_to_group(
-                    MESSAGE_TYPE_ASSISTANT, res_message, "assistant", timezone.now()
+                    MESSAGE_TYPE_ASSISTANT, res_message, SENDER_ASSISTANT, timezone.now()
                 )
             # Save assistant message to Redis
             RedisChatHistoryService.save_message(
-                self.room_name, "assistant", res_message, timezone.now().isoformat()
+                self.room_name, SENDER_ASSISTANT, res_message, timezone.now().isoformat()
             )
             log_search_and_child_functions(f"Assistant message: {res_message}")
         except json.JSONDecodeError:
@@ -78,7 +78,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
         except Exception as e:
             logger.error(ERR_UNEXPECTED_LOG.format(error=str(e)), exc_info=True)
             await self.send_message_to_group(
-                MESSAGE_TYPE_ERROR, ERR_MSG_UNEXPECTED, "assistant", timezone.now()
+                MESSAGE_TYPE_ERROR, ERR_MSG_UNEXPECTED, SENDER_ASSISTANT, timezone.now()
             )
 
     async def send_message_to_group(
