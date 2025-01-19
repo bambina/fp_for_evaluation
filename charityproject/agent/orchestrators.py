@@ -33,8 +33,8 @@ class OpenAIInteractionOrchestrator:
                 result = MilvusClientService.hybrid_search(query_vectors)
                 # print(f"\nQuery: {query}\n")
                 # print(f"\nSearch result: {result}\n")
-                # log_search_and_child_functions(f"Query: {query}\n")
-                # log_search_and_child_functions(f"Search result: {result}\n")
+                log_search_and_child_functions(f"Query: {query}\n")
+                log_search_and_child_functions(f"Search result: {result}\n")
                 system_content = OpenAIClientService.compose_relevant_docs(result)
                 # Get a completion from the OpenAI model using the retrieved data
                 completion = OpenAIClientService.chat_completion(
@@ -57,8 +57,8 @@ class OpenAIInteractionOrchestrator:
                 print(f"\nfilters: {filters}\n")
                 print(f"\nN: {num_children}\n")
                 print(f"\nChild: {children}\n")
-                # log_search_and_child_functions(f"filters: {filters}\n")
-                # log_search_and_child_functions(f"Child: {child}\n")
+                log_search_and_child_functions(f"filters: {filters}\n")
+                log_search_and_child_functions(f"Child: {child}\n")
                 child_found = True
                 if not child:
                     child_found = False
@@ -119,5 +119,5 @@ class OpenAIInteractionOrchestrator:
             for keyword in keywords:
                 profile_q &= Q(profile_description__icontains=keyword)
         final_q = Q(**filters) & profile_q if profile_q else Q(**filters)
-        print(f"\nFilters: {final_q}\n")
+        # print(f"\nFilters: {final_q}\n")
         return final_q, num_children

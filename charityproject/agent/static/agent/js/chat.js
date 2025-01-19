@@ -2,8 +2,11 @@
 
 // The following variables are passed from the Django template:
 const hostName = JSON.parse(document.getElementById("host-name").textContent);
-const roonName = JSON.parse(document.getElementById("room-name").textContent);
-const url = `ws://${hostName}/ws/chat/${roonName}/`;
+const roomName = JSON.parse(document.getElementById("room-name").textContent);
+// Check if the current page is loaded over HTTPS
+const wsProtocol = window.location.protocol === "https:" ? "wss://" : "ws://";
+// Construct WebSocket URL
+const url = `${wsProtocol}${hostName}/ws/chat/${roomName}/`;
 const MESSAGE_TYPE_CLOSE = "close.connection";
 const MESSAGE_TYPE_QUESTION = "question.message";
 const MESSAGE_TYPE_ASSISTANT = "assistant.message";
@@ -64,7 +67,7 @@ class WebSocketClient {
         this.maxRetries--;
       }, this.autoReconnectInterval);
     } else {
-        console.log("WebSocket connection has been lost. Please try accessing from the course details page again, or wait a while before retrying.");
+        console.log("WebSocket connection has been lost. Please try accessing from the Top page again, or wait a while before retrying.");
     }
   }
 
