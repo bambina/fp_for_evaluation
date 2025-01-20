@@ -46,6 +46,7 @@ class OpenAIInteractionOrchestrator:
                 filters, num_children = (
                     OpenAIInteractionOrchestrator.build_child_filters(arguments)
                 )
+                log_search_and_child_functions(f"filters: {filters}\n")
                 # Fetch child based on attributes
                 children = []
                 async for child in (
@@ -56,11 +57,9 @@ class OpenAIInteractionOrchestrator:
                     children.append(child)
                 print(f"\nfilters: {filters}\n")
                 print(f"\nN: {num_children}\n")
-                print(f"\nChild: {children}\n")
-                log_search_and_child_functions(f"filters: {filters}\n")
-                log_search_and_child_functions(f"Child: {child}\n")
+                print(f"\nchildren: {children}\n")
                 child_found = True
-                if not child:
+                if not children:
                     child_found = False
                     random_birth_month = (datetime.now().second % 12) + 1
                     child = (
