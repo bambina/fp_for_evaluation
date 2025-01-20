@@ -3,11 +3,13 @@
 {% load bootstrap_icons %}
 {% block content %}
     <section class="hero-section py-5 mt-5">
-        <div class="container py-5">
-            <div class="col-lg-7 col-md-8 py-2">
+        <div class="container py-5 px-0">
+            <div class="col-lg-7 col-md-8 pt-5">
                 <h1 class="fw-light text-shadow-lg">Together, we can light the way.</h1>
                 <p class="lead text-shadow-lg">
-                    Your small act of kindness can brighten the future of children in need. Every donation brings hope, education, and a chance for a better tomorrow.
+                    Your small act of kindness can brighten the future of children in need.
+                    <br>
+                    Every donation brings hope, education, and a chance for a better tomorrow.
                 </p>
                 <p>
                     <a href="#" class="btn btn-primary my-2">Donate Now</a>
@@ -36,9 +38,14 @@
             <div class="row">
                 <div class="col-md-4">
                     <div class="card">
-                        <img src="{% static 'core/images/mission.jpg' %}"
-                             class="card-img-top"
-                             alt="Our Mission">
+                        <div class="position-relative">
+                            <!-- Use src="{% static 'core/images/mission.jpg' %}" if the image link is broken -->
+                            <img src="https://www.savethechildren.org.uk/content/dam/global/images/countries/somalia/fatima-ch1357581-orig.jpg"
+                                 class="card-img-top"
+                                 alt="Our Mission">
+                            <!-- Photo credit overlay -->
+                            <div class="photo-credit">Photo credit: Save the Children</div>
+                        </div>
                         <div class="card-body text-center">
                             <h5 class="card-title">Our Mission</h5>
                             <p class="card-text">Learn about our mission to empower children through education, healthcare, and support.</p>
@@ -48,9 +55,14 @@
                 </div>
                 <div class="col-md-4">
                     <div class="card">
-                        <img src="{% static 'core/images/activities.jpg' %}"
-                             class="card-img-top"
-                             alt="What We Do">
+                        <div class="position-relative">
+                            <!-- Use src="{% static 'core/images/activities.jpg' %}" if the image link is broken -->
+                            <img src="https://www.savethechildren.org.uk/content/dam/gb/images/pp/tenneh--ch1575045-orig.jpg"
+                                 class="card-img-top"
+                                 alt="What We Do">
+                            <!-- Photo credit overlay -->
+                            <div class="photo-credit">Photo credit: Save the Children</div>
+                        </div>
                         <div class="card-body text-center">
                             <h5 class="card-title">What We Do</h5>
                             <p class="card-text">Discover the initiatives we undertake to improve the lives of children in need.</p>
@@ -60,9 +72,14 @@
                 </div>
                 <div class="col-md-4">
                     <div class="card">
-                        <img src="{% static 'core/images/news.jpg' %}"
-                             class="card-img-top"
-                             alt="Latest News">
+                        <div class="position-relative">
+                            <!-- Use src="{% static 'core/images/news.jpg' %}" if the image link is broken -->
+                            <img src="https://www.savethechildren.org.uk/content/dam/global/images/countries/madagascar/vanilla-madagascar-ch1306092-orig.jpg"
+                                 class="card-img-top"
+                                 alt="Latest News">
+                            <!-- Photo credit overlay -->
+                            <div class="photo-credit">Photo credit: Save the Children</div>
+                        </div>
                         <div class="card-body text-center">
                             <h5 class="card-title">Latest News</h5>
                             <p class="card-text">Stay updated with our latest news and stories about the impact of your support.</p>
