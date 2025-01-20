@@ -66,7 +66,8 @@
                 <!-- Previous Button -->
                 {% if children.has_previous %}
                     <li class="page-item">
-                        <a class="page-link" href="?page={{ children.previous_page_number }}">Previous</a>
+                        <a class="page-link"
+                           href="?{{ request.GET.urlencode }}&page={{ children.previous_page_number }}">Previous</a>
                     </li>
                 {% else %}
                     <li class="page-item disabled">
@@ -81,14 +82,16 @@
                         </li>
                     {% else %}
                         <li class="page-item">
-                            <a class="page-link" href="?page={{ page_num }}">{{ page_num }}</a>
+                            <a class="page-link"
+                               href="?{{ request.GET.urlencode }}&page={{ page_num }}">{{ page_num }}</a>
                         </li>
                     {% endif %}
                 {% endfor %}
                 <!-- Next Button -->
                 {% if children.has_next %}
                     <li class="page-item">
-                        <a class="page-link" href="?page={{ children.next_page_number }}">Next</a>
+                        <a class="page-link"
+                           href="?{{ request.GET.urlencode }}&page={{ children.next_page_number }}">Next</a>
                     </li>
                 {% else %}
                     <li class="page-item disabled">
