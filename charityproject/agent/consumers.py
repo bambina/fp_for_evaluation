@@ -63,14 +63,21 @@ class ChatConsumer(AsyncWebsocketConsumer):
             response = await OpenAIInteractionOrchestrator.generate_response(
                 chat_history
             )
+            # response = {"content": "Hello, how can I help you?"}
             res_message = response["content"]
             if res_message:
                 await self.send_message_to_group(
-                    MESSAGE_TYPE_ASSISTANT, res_message, SENDER_ASSISTANT, timezone.now()
+                    MESSAGE_TYPE_ASSISTANT,
+                    res_message,
+                    SENDER_ASSISTANT,
+                    timezone.now(),
                 )
             # Save assistant message to Redis
             RedisChatHistoryService.save_message(
-                self.room_name, SENDER_ASSISTANT, res_message, timezone.now().isoformat()
+                self.room_name,
+                SENDER_ASSISTANT,
+                res_message,
+                timezone.now().isoformat(),
             )
             log_search_and_child_functions(f"Assistant message: {res_message}")
         except json.JSONDecodeError:

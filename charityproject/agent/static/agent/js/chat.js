@@ -18,6 +18,10 @@ const TOAST_DELAY = 5000;
 const ASSISTANT_DISPLAY_NAME = "Assistant Nico";
 const USER_DISPLAY_NAME = "User";
 const SENDER_NAME_USER = "user"; // Supported value for the OpenAI API
+const THINKING_MESSAGE_TEXT = "Thinking...";
+const MESSAGE_INPUT_ID = "message_input";
+const THINKING_MESSAGE_ID = "thinkingMsg";
+const CHAT_CONTAINER_ID = "chat-container";
 
 // WebSocket client class
 class WebSocketClient {
@@ -62,13 +66,15 @@ class WebSocketClient {
 
   reconnect() {
     if (this.maxRetries > 0) {
-        console.log("WebSocket connection lost. Reconnecting...");
+      console.log("WebSocket connection lost. Reconnecting...");
       setTimeout(() => {
         this.connect();
         this.maxRetries--;
       }, this.autoReconnectInterval);
     } else {
-        console.log("WebSocket connection has been lost. Please try accessing from the Top page again, or wait a while before retrying.");
+      console.log(
+        "WebSocket connection has been lost. Please try accessing from the Top page again, or wait a while before retrying."
+      );
     }
   }
 
@@ -81,7 +87,7 @@ class WebSocketClient {
         })
       );
     } else {
-        console.log("WebSocket connection is not open.");
+      console.log("WebSocket connection is not open.");
     }
   }
 
@@ -98,7 +104,6 @@ class WebSocketClient {
       handler(data);
     }
   }
-
 }
 
 // Initialize the WebSocket client
@@ -107,127 +112,204 @@ const client = new WebSocketClient(url);
 // Add event handlers
 client.addHandler("open", () => {
   setupFormEventListeners();
-//   toggleFormElements(false);
+  //   toggleFormElements(false);
 });
 
 client.addHandler("message", (data) => {
   if (data.type === MESSAGE_TYPE_CLOSE) {
     handleSessionEnd(data);
-  } else if (data.type === MESSAGE_TYPE_ASSISTANT || data.type === MESSAGE_TYPE_ERROR) {
+  } else if (
+    data.type === MESSAGE_TYPE_ASSISTANT ||
+    data.type === MESSAGE_TYPE_ERROR
+  ) {
     // Add a message from the assistant
-    createCard(data, isAssistant=true);
+    displayMessage(data.message, (isAssistant = true));
   }
 });
 
 function handleSessionEnd(data) {
-//   toggleFormElements(true);
-  createCard(data);
+  //   toggleFormElements(true);
+  displayMessage(data.message);
 }
 
-function createCard(question, isAssistant=false) {
-  // Create a new row wrapper for the card
+/**
+ * Creates a DOM element representing the assistant's message.
+ */
+function createAssistantMessageDom(message) {
+  // 1. Create a wrapper for the row
   var rowWrapper = document.createElement("div");
-  if (isAssistant) {
-    rowWrapper.className = "row mb-1 justify-content-start";
-  } else {
-    rowWrapper.className = "row mb-1 justify-content-end";
-  }
-  // Create a column with auto width
-  var autoWidth = document.createElement("div");
-  autoWidth.className = "col-auto";
-  rowWrapper.appendChild(autoWidth);
-  // Create the card element
+  rowWrapper.className = "row mb-1 justify-content-start";
+  // 2. Create a column for the card with automatic width
+  var columnWrapper = document.createElement("div");
+  columnWrapper.className = "col-auto";
+  // 3. Create the card element
   var card = document.createElement("div");
-  card.className = "card";
-  if (isAssistant) {
-    card.classList.add("bg-light"); // Assistant messages have a light background
-  }
-  autoWidth.appendChild(card);
-  // Create the card body
+  card.className = "card bg-light";
+  // 4. Create the card body
   var cardBody = document.createElement("div");
   cardBody.className = "card-body";
-  card.appendChild(cardBody);
-  // Add the sender name
+  // 5. Add the sender's name
   var sender = document.createElement("h5");
   sender.className = "card-title";
-  if (isAssistant) {
-    sender.textContent = ASSISTANT_DISPLAY_NAME;
-  } else {
-    sender.textContent = USER_DISPLAY_NAME;
-  }
+  sender.textContent = ASSISTANT_DISPLAY_NAME;
+  // 6. Add the message content
+  var messageContent = document.createElement("p");
+  messageContent.className = "card-text";
+  // Replace newlines with <br> for formatting
+  messageContent.innerHTML = message.replace(/\n/g, "<br>");
+  // 7. Assemble the card structure
+  rowWrapper.appendChild(columnWrapper);
+  columnWrapper.appendChild(card);
+  card.appendChild(cardBody);
   cardBody.appendChild(sender);
-  // Add the question message
-  var newPost = document.createElement("p");
-  newPost.className = "card-text";
-  newPost.innerHTML = question.message.replace(/\n/g, "<br>");
-  cardBody.appendChild(newPost);
-  // Remove the generating message
-  var generatingMsg = document.getElementById("generatingMsg");
-  if (generatingMsg) {
-    generatingMsg.remove();
+  cardBody.appendChild(messageContent);
+  // 8. Return the completed DOM structure
+  return rowWrapper;
+}
+
+/**
+ * Creates a DOM element representing the user's message.
+ */
+function createUserMessageDom(message) {
+  // 1. Create a wrapper for the row
+  var rowWrapper = document.createElement("div");
+  rowWrapper.className = "row mb-1 justify-content-end";
+  // 2. Create a column for the card with automatic width
+  var columnWrapper = document.createElement("div");
+  columnWrapper.className = "col-auto";
+  // 3. Create the card element
+  var card = document.createElement("div");
+  card.className = "card";
+  // 4. Create the card body
+  var cardBody = document.createElement("div");
+  cardBody.className = "card-body";
+  // 5. Add the sender's name
+  var sender = document.createElement("h5");
+  sender.className = "card-title";
+  sender.textContent = USER_DISPLAY_NAME;
+  // 6. Add the user's message content
+  var messageContent = document.createElement("p");
+  messageContent.className = "card-text";
+  // Replace newlines with <br> for formatting
+  messageContent.innerHTML = message.replace(/\n/g, "<br>");
+  // 7. Assemble the card structure
+  rowWrapper.appendChild(columnWrapper);
+  columnWrapper.appendChild(card);
+  card.appendChild(cardBody);
+  cardBody.appendChild(sender);
+  cardBody.appendChild(messageContent);
+  // 8. Return the completed DOM structure
+  return rowWrapper;
+}
+
+/**
+ * Displays a new message in the chat container.
+ */
+function displayMessage(message, isAssistant = false) {
+  // Determine the appropriate message DOM based on sender type
+  let messageDom;
+  if (isAssistant) {
+    messageDom = createAssistantMessageDom(message);
+  } else {
+    messageDom = createUserMessageDom(message);
   }
-  document.getElementById("chat-container").appendChild(rowWrapper);
+  // Remove the "Thinking..." message if exists
+  const thinkingMsg = document.getElementById(THINKING_MESSAGE_ID);
+  if (thinkingMsg) {
+    thinkingMsg.remove();
+  }
+  // Append the new message to the chat container
+  document.getElementById(CHAT_CONTAINER_ID).appendChild(messageDom);
+  // Smooth scroll to the bottom of the page
   window.scrollTo({
     top: document.body.scrollHeight,
-    behavior: 'smooth'
+    behavior: "smooth",
   });
 }
 
+/**
+ * Sends the message to the chatbot and display the message.
+ */
 function sendMessage() {
-  const messageInputDom = document.getElementById("message_input");
+  const messageInputDom = document.getElementById(MESSAGE_INPUT_ID);
   const message = messageInputDom.value;
-  createCard({ message: message });
+  // Create a chat card for the user's message
+  displayMessage(message);
+  // Send the message to the chatbot
   client.send(message, SENDER_NAME_USER);
   messageInputDom.value = "";
-  appendGeneratingMessage();
+  // Display the "Thinking..." indicator
+  appendThinkingMessage();
 }
 
-function appendGeneratingMessage() {
+/**
+ * Displays a "Thinking..." message while the bot is generating a response.
+ */
+function appendThinkingMessage() {
+  // Create the message element
   var message = document.createElement("div");
-  message.id = "generatingMsg";
+  message.id = THINKING_MESSAGE_ID;
+  message.textContent = THINKING_MESSAGE_TEXT;
   message.className = "text-primary blink";
-  message.textContent = "Generating...";
-  document.getElementById("chat-container").appendChild(message);
+  // Append the message to the chat container
+  document.getElementById(CHAT_CONTAINER_ID).appendChild(message);
+  // Smooth scroll to the bottom of the page
   window.scrollTo({
     top: document.body.scrollHeight,
-    behavior: 'smooth'
+    behavior: "smooth",
   });
 }
 
+/**
+ * Sets up event listeners for the message input and the send button.
+ */
 function setupFormEventListeners() {
-  let messageInput = document.getElementById("message_input");
+  let messageInput = document.getElementById(MESSAGE_INPUT_ID);
   let postBtn = document.getElementById("send_btn");
 
-  if (messageInput) {
-    messageInput.onkeydown = function (e) {
-        if (e.isComposing || e.key === 'Process' || e.keyCode === 229) {
-            // IME input in progress
-            return;
-        }
-        if (messageInput.value.trim().length <= 0 && e.key === "Enter") {
-            e.preventDefault();
-            return; // Prevent line break when input is empty
-        }
-        if (e.key === "Enter" && !e.shiftKey && messageInput.value.trim().length > 0) {
-            e.preventDefault();
-            sendMessage(); // Send the message when Enter is pressed without Shift
-        }
-    };
-
-    messageInput.oninput = function () {
-        if (messageInput.value.trim().length === 0) {
-            postBtn.disabled = true;
-        } else {
-            postBtn.disabled = false;
-        }
-    };
+  if (!messageInput && !postBtn) {
+    // TODO: Show error message
+    console.error("Message input field or post button not found.");
+    return;
   }
 
-  if (postBtn) {
-    postBtn.onclick = function () {
+  // Handle keydown events for the message input field
+  messageInput.onkeydown = function (e) {
+    // Check if IME (Input Method Editor) input is in progress
+    if (e.isComposing || e.key === "Process" || e.keyCode === 229) {
+      return;
+    }
+    // Prevent submitting empty messages
+    if (messageInput.value.trim().length <= 0 && e.key === "Enter") {
+      e.preventDefault();
+      return;
+    }
+    // Send the message when Enter is pressed without Shift and the input is not empty
+    if (
+      e.key === "Enter" &&
+      !e.shiftKey &&
+      messageInput.value.trim().length > 0
+    ) {
+      e.preventDefault();
       sendMessage();
-    };
-  }
+      postBtn.disabled = true;
+    }
+  };
+
+  // Handle input events for the message input field
+  messageInput.oninput = function () {
+    if (messageInput.value.trim().length === 0) {
+      postBtn.disabled = true;
+    } else {
+      postBtn.disabled = false;
+    }
+  };
+
+  // Handle click events for the post button
+  postBtn.onclick = function () {
+    sendMessage();
+    postBtn.disabled = true;
+  };
 }
 
 client.connect();
