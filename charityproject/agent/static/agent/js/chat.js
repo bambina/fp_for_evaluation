@@ -7,6 +7,7 @@ const roomName = JSON.parse(document.getElementById("room-name").textContent);
 const wsProtocol = window.location.protocol === "https:" ? "wss://" : "ws://";
 // Construct WebSocket URL
 const url = `${wsProtocol}${hostName}/ws/chat/${roomName}/`;
+// Constants for the WebSocket connection
 const MESSAGE_TYPE_CLOSE = "close.connection";
 const MESSAGE_TYPE_ASSISTANT = "assistant.message";
 const MESSAGE_TYPE_ERROR = "error.message";
@@ -14,13 +15,15 @@ const SESSION_TERMINATE_CODE = 4000;
 const UNAUTHORIZED_ACCESS_CODE = 4001;
 const MAX_RETRIES = 3;
 const RECONNECT_INTERVAL = 1000 * 5;
-const TOAST_DELAY = 5000;
+// Constants for the chat interface
 const ASSISTANT_DISPLAY_NAME = "Assistant Nico";
 const USER_DISPLAY_NAME = "User";
 const SENDER_NAME_USER = "user"; // Supported value for the OpenAI API
 const THINKING_MESSAGE_TEXT = "Thinking...";
-const MESSAGE_INPUT_ID = "message_input";
+// Element IDs
 const THINKING_MESSAGE_ID = "thinkingMsg";
+const MESSAGE_INPUT_ID = "message_input";
+const SEND_BTN_ID = "send_btn";
 const CHAT_CONTAINER_ID = "chat-container";
 
 // WebSocket client class
@@ -47,7 +50,7 @@ class WebSocketClient {
         e.code === SESSION_TERMINATE_CODE ||
         e.code === UNAUTHORIZED_ACCESS_CODE
       ) {
-        // toggleFormElements(true);
+        toggleFormElements(true);
       } else {
         if (!e.wasClean) {
           this.reconnect();
@@ -112,7 +115,7 @@ const client = new WebSocketClient(url);
 // Add event handlers
 client.addHandler("open", () => {
   setupFormEventListeners();
-  //   toggleFormElements(false);
+  toggleFormElements(false);
 });
 
 client.addHandler("message", (data) => {
@@ -127,9 +130,14 @@ client.addHandler("message", (data) => {
   }
 });
 
+/**
+ * Handles the end of the chat session.
+ */
 function handleSessionEnd(data) {
-  //   toggleFormElements(true);
-  displayMessage(data.message);
+  // Disable the message input field
+  toggleFormElements(true);
+  // Display the session end message
+  displayMessage(data.message, (isAssistant = true));
 }
 
 /**
@@ -265,7 +273,7 @@ function appendThinkingMessage() {
  */
 function setupFormEventListeners() {
   let messageInput = document.getElementById(MESSAGE_INPUT_ID);
-  let postBtn = document.getElementById("send_btn");
+  let postBtn = document.getElementById(SEND_BTN_ID);
 
   if (!messageInput && !postBtn) {
     // TODO: Show error message
@@ -310,6 +318,21 @@ function setupFormEventListeners() {
     sendMessage();
     postBtn.disabled = true;
   };
+}
+
+/**
+ * Toggles the disabled state of form elements.
+ */
+function toggleFormElements(disable) {
+  // List of element IDs to be toggled.
+  const elementIds = [MESSAGE_INPUT_ID];
+
+  elementIds.forEach((id) => {
+    const element = document.getElementById(id);
+    if (element) {
+      element.disabled = disable;
+    }
+  });
 }
 
 client.connect();

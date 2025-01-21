@@ -58,6 +58,7 @@ class OpenAIInteractionOrchestrator:
                 print(f"\nfilters: {filters}\n")
                 print(f"\nN: {num_children}\n")
                 print(f"\nchildren: {children}\n")
+                log_search_and_child_functions(f"children: {children}\n")
                 child_found = True
                 if not children:
                     child_found = False
