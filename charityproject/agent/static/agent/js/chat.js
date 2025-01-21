@@ -26,25 +26,32 @@ const MESSAGE_INPUT_ID = "message_input";
 const SEND_BTN_ID = "send_btn";
 const CHAT_CONTAINER_ID = "chat-container";
 
-// WebSocket client class
+/**
+ * WebSocket client class.
+ */
 class WebSocketClient {
   constructor(url) {
     this.url = url;
     this.ws = null;
-    this.maxRetries = MAX_RETRIES;
-    this.autoReconnectInterval = RECONNECT_INTERVAL;
+    this.maxRetries = MAX_RETRIES; // Max retry attempts for reconnection
+    this.autoReconnectInterval = RECONNECT_INTERVAL; // Interval between reconnection attempts
     this.messageHandlers = new Map();
   }
 
   connect() {
     this.ws = new WebSocket(this.url);
+
+    // Triggered when the connection is opened
     this.ws.onopen = () => {
       if (this.maxRetries !== MAX_RETRIES) {
         console.log("WebSocket connection restored.");
       }
       this.maxRetries = MAX_RETRIES;
+      // Trigger custom 'open' event handlers
       this.triggerHandler("open");
     };
+
+    // Triggered when the connection is closed
     this.ws.onclose = (e) => {
       if (
         e.code === SESSION_TERMINATE_CODE ||
@@ -57,30 +64,42 @@ class WebSocketClient {
         }
       }
     };
+
+    // Triggered on a WebSocket error
     this.ws.onerror = (e) => {
       console.error("WebSocket error:", e);
       this.ws.close();
     };
+
+    // Triggered when a message is received from the server
     this.ws.onmessage = (e) => {
       const data = JSON.parse(e.data);
+      // Trigger custom 'message' event handlers
       this.triggerHandler("message", data);
     };
   }
 
+  /**
+   * Reconnects to the WebSocket server.
+   */
   reconnect() {
     if (this.maxRetries > 0) {
       console.log("WebSocket connection lost. Reconnecting...");
+      // Retry connection after a specified interval
       setTimeout(() => {
         this.connect();
         this.maxRetries--;
       }, this.autoReconnectInterval);
     } else {
       console.log(
-        "WebSocket connection has been lost. Please try accessing from the Top page again, or wait a while before retrying."
+        "WebSocket connection lost. Please refresh the Chat page or try again later."
       );
     }
   }
 
+  /**
+   * Sends a message to the WebSocket server.
+   */
   send(message, sender) {
     if (this.ws && this.ws.readyState === WebSocket.OPEN) {
       this.ws.send(
@@ -94,6 +113,9 @@ class WebSocketClient {
     }
   }
 
+  /**
+   * Adds a handler for a specific WebSocket event.
+   */
   addHandler(event, handler) {
     if (!this.messageHandlers.has(event)) {
       this.messageHandlers.set(event, new Set());
@@ -101,6 +123,9 @@ class WebSocketClient {
     this.messageHandlers.get(event).add(handler);
   }
 
+  /**
+   * Triggers all handlers for a specific event.
+   */
   triggerHandler(event, data) {
     const handlers = this.messageHandlers.get(event) || new Set();
     for (const handler of handlers) {
@@ -112,20 +137,23 @@ class WebSocketClient {
 // Initialize the WebSocket client
 const client = new WebSocketClient(url);
 
-// Add event handlers
+// Add an event handler for the "open" event
 client.addHandler("open", () => {
+  // Set up form event listeners and enable form elements
   setupFormEventListeners();
   toggleFormElements(false);
 });
 
+// Add an event handler for the "message" event
 client.addHandler("message", (data) => {
   if (data.type === MESSAGE_TYPE_CLOSE) {
+    // Terminate the chat session
     handleSessionEnd(data);
   } else if (
     data.type === MESSAGE_TYPE_ASSISTANT ||
     data.type === MESSAGE_TYPE_ERROR
   ) {
-    // Add a message from the assistant
+    // Display a message from the assistant
     displayMessage(data.message, (isAssistant = true));
   }
 });
@@ -335,4 +363,5 @@ function toggleFormElements(disable) {
   });
 }
 
+// Connect to the WebSocket server
 client.connect();
