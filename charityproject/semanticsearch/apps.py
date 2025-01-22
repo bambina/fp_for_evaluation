@@ -12,6 +12,10 @@ class SemanticsearchConfig(AppConfig):
         """
         This method is called when the app is ready.
         """
+        # Prevent the model from being loaded when running tests
+        if "pytest" in sys.modules:
+            return
+
         allowed_commands = {"runserver"}
         if len(sys.argv) > 1 and sys.argv[1] in allowed_commands:
             if sys.argv[1] == "runserver" and os.environ.get("RUN_MAIN") != "true":
