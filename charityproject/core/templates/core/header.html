@@ -9,8 +9,8 @@
             </a>
             <ul class="nav col-12 col-lg-auto mb-2 justify-content-center mb-md-0 ms-auto">
                 <li>
-                    <a href="{% url 'top' %}"
-                       class="nav-link px-2 {% if request.resolver_match.url_name == 'top' %}text-secondary{% else %}text-white{% endif %}">
+                    <a href="{% url 'core:top' %}"
+                       class="nav-link px-2 {% if request.resolver_match.namespace == 'core' and request.resolver_match.url_name == 'top' %}text-secondary{% else %}text-white{% endif %}">
                         Top
                     </a>
                 </li>
