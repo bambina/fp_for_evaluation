@@ -196,16 +196,26 @@ LOGGING = {
     },
     "handlers": {
         "usertest_file": {
-            "level": "INFO",  # 必要なレベルに調整
+            "level": "INFO",
             "class": "logging.FileHandler",
-            "filename": "usertest.log",  # 出力ファイル名
+            "filename": "usertest.log",
             "formatter": "verbose",
+        },
+        "console": {
+            "class": "logging.StreamHandler",
+            "formatter": "simple",
+            "level": "DEBUG",
         },
     },
     "loggers": {
-        "usertest": {  # ユーザーテスト専用ロガー
+        "usertest": {
             "handlers": ["usertest_file"],
             "level": "INFO",
+            "propagate": False,
+        },
+        "charityproject": {
+            "handlers": ["console"],
+            "level": "DEBUG",
             "propagate": False,
         },
     },

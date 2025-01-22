@@ -7,6 +7,8 @@ from django.conf import settings
 from agent.constants import *
 from django.urls import reverse
 
+from core.utils import *
+
 
 class OpenAIClientService:
     _client = None
@@ -110,6 +112,7 @@ class RedisChatHistoryService:
 
     @classmethod
     def save_message(cls, session_id, sender, message, timestamp, ttl_sec=60 * 60):
+        log_user_test(f"{sender} message: {message}")
         if cls._redis is None:
             cls.init_redis()
 

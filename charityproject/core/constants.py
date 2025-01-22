@@ -1,5 +1,8 @@
 # Constants used in the application
 
+# Logger names
+PROJECT_LOGGER_NAME = "charityproject"
+
 # Error messages
 MAX_LENGTH_255_INVALID_ERR = "Must be 255 characters or fewer"
 MAX_LENGTH_2048_INVALID_ERR = "Must be 2048 characters or fewer"

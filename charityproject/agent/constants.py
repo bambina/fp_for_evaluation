@@ -67,6 +67,7 @@ Your response should:
 - Conclude your response with a sentence that includes a clickable HTML link to learn more about the child and how to support them. The link should use an `<a>` tag with the `target="_blank"` attribute. For example: 'To learn more about [child's name] and how you can support them, please visit this link: <a href="[child's link]" target="_blank">[child's link]</a>'.
 
 Please do not:
+- Use bold or any special formatting.
 - Use Markdown formatting (e.g., brackets or parentheses) or plain text for the link.
 - Include any follow-up questions such as "Would you like to learn more about sponsoring [child's name]?" or similar phrases.
 

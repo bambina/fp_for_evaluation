@@ -9,13 +9,14 @@ from django.db.models import Q
 from agent.constants import *
 from agent.services import *
 from semanticsearch.services import *
-from core.utils import log_search_and_child_functions
+from core.utils import *
 
 
 class OpenAIInteractionOrchestrator:
 
     @staticmethod
-    async def generate_response(chat_history):
+    async def generate_response(room_name):
+        chat_history = RedisChatHistoryService.get_chat_history(room_name)
         # Get a response from the OpenAI model
         completion = OpenAIClientService.chat_completion(
             USE_INEXPENSIVE_MODEL, SYSTEM_CONTENT_1, chat_history, TOOLS
@@ -33,8 +34,8 @@ class OpenAIInteractionOrchestrator:
                 result = MilvusClientService.hybrid_search(query_vectors)
                 # print(f"\nQuery: {query}\n")
                 # print(f"\nSearch result: {result}\n")
-                log_search_and_child_functions(f"Query: {query}\n")
-                log_search_and_child_functions(f"Search result: {result}\n")
+                log_user_test(f"Query: {query}\n")
+                log_user_test(f"Search result: {result}\n")
                 system_content = OpenAIClientService.compose_relevant_docs(result)
                 # Get a completion from the OpenAI model using the retrieved data
                 completion = OpenAIClientService.chat_completion(
@@ -46,7 +47,7 @@ class OpenAIInteractionOrchestrator:
                 filters, num_children = (
                     OpenAIInteractionOrchestrator.build_child_filters(arguments)
                 )
-                log_search_and_child_functions(f"filters: {filters}\n")
+                log_user_test(f"filters: {filters}\n")
                 # Fetch child based on attributes
                 children = []
                 async for child in (
@@ -58,7 +59,7 @@ class OpenAIInteractionOrchestrator:
                 print(f"\nfilters: {filters}\n")
                 print(f"\nN: {num_children}\n")
                 print(f"\nchildren: {children}\n")
-                log_search_and_child_functions(f"children: {children}\n")
+                log_user_test(f"children: {children}\n")
                 child_found = True
                 if not children:
                     child_found = False
@@ -83,7 +84,7 @@ class OpenAIInteractionOrchestrator:
                 return f"OpenAI model wants to call a function not defined: {function_name}"
         else:
             # print(f"\nFinish reason: {finish_reason}\n")
-            log_search_and_child_functions(f"Finish reason: {finish_reason}\n")
+            log_user_test(f"Finish reason: {finish_reason}\n")
 
         return {
             "model": completion.model,

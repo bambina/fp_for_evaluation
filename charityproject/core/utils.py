@@ -37,8 +37,9 @@ def track_user_with_session(request, event):
     print(msg)
 
 
-def log_search_and_child_functions(text):
+def log_user_test(text):
     """
-    Log messages for search and child-related functions.
+    Log messages for user testing purposes.
+    Captures user interactions and system responses for analysis.
     """
     usertest_logger.info(text)

@@ -1,5 +1,4 @@
 import json
-import datetime
 import logging
 from typing import Dict
 
@@ -11,27 +10,39 @@ from agent.services import *
 from semanticsearch.services import *
 from agent.orchestrators import *
 from core.utils import *
+from core.constants import *
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger(PROJECT_LOGGER_NAME)
 
 
 class ChatConsumer(AsyncWebsocketConsumer):
+    """
+    WebSocket consumer for handling real-time chat functionality.
+    """
+
+    @property
+    def current_time(self) -> str:
+        """Return current time in ISO format."""
+        return timezone.now().isoformat()
+
     async def connect(self):
         """Connection event handler provided by AsyncWebsocketConsumer."""
-        print("Connected")
         self.room_name = self.scope["url_route"]["kwargs"]["room_name"]
         self.room_group_name = f"chat_{self.room_name}"
-        # Verify session ID
+        # Verify session ID and handle unauthorized access
         if not verify_session_id(self.room_name):
-            print(f"Invalid session ID attempted: {self.room_name}")
+            logger.warning(
+                f"Unauthorized connection attempt with session ID: {self.room_name}"
+            )
             await self.close(code=UNAUTHORIZED_ACCESS_CODE)
             return
-        # Join room group
+        # Add user to the chat room group
         await self.channel_layer.group_add(self.room_group_name, self.channel_name)
         await self.accept()
+        logger.info(f"New connection established in room: {self.room_name}")
         # Send a welcome message to the user
         await self.send_message_to_group(
-            MESSAGE_TYPE_ASSISTANT, INITIAL_MSG, SENDER_ASSISTANT, timezone.now()
+            MESSAGE_TYPE_ASSISTANT, INITIAL_MSG, SENDER_ASSISTANT
         )
         # Save assistant message to Redis
         RedisChatHistoryService.save_message(
@@ -40,56 +51,53 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
     async def disconnect(self, close_code):
         """Disconnection event handler provided by AsyncWebsocketConsumer."""
-        print("Disconnected")
-        # Leave room group
+        logger.info(
+            f"Client disconnecting from room {self.room_name} with code: {close_code}"
+        )
+        # Remove user from the group
         await self.channel_layer.group_discard(self.room_group_name, self.channel_name)
 
     async def receive(self, text_data):
         """Message receive handler provided by AsyncWebsocketConsumer."""
-        print("Received")
+        logger.debug("Received WebSocket message")
         try:
+            # Parse incoming message
             data = json.loads(text_data)
             message = data.get("message")
             sender = data.get("sender")
-
-            # Save user message to Redis
+            # Save user message to chat history
             RedisChatHistoryService.save_message(
-                self.room_name, sender, message, timezone.now().isoformat()
+                self.room_name, sender, message, self.current_time
             )
-            log_search_and_child_functions(f"User message: {message}")
-            # Load chat history from Redis
-            chat_history = RedisChatHistoryService.get_chat_history(self.room_name)
             # Generate response using OpenAI API
             response = await OpenAIInteractionOrchestrator.generate_response(
-                chat_history
+                self.room_name
             )
             # response = {"content": "Hello, how can I help you?"}
-            res_message = response["content"]
-            if res_message:
+            # Process and save AI response
+            if bot_message := response["content"]:
                 await self.send_message_to_group(
                     MESSAGE_TYPE_ASSISTANT,
-                    res_message,
+                    bot_message,
                     SENDER_ASSISTANT,
-                    timezone.now(),
                 )
-            # Save assistant message to Redis
-            RedisChatHistoryService.save_message(
-                self.room_name,
-                SENDER_ASSISTANT,
-                res_message,
-                timezone.now().isoformat(),
-            )
-            log_search_and_child_functions(f"Assistant message: {res_message}")
+                # Save AI response to chat history
+                RedisChatHistoryService.save_message(
+                    self.room_name,
+                    SENDER_ASSISTANT,
+                    bot_message,
+                    self.current_time,
+                )
         except json.JSONDecodeError:
             logger.error(ERR_INVALID_JSON, exc_info=True)
         except Exception as e:
             logger.error(ERR_UNEXPECTED_LOG.format(error=str(e)), exc_info=True)
             await self.send_message_to_group(
-                MESSAGE_TYPE_ERROR, ERR_MSG_UNEXPECTED, SENDER_ASSISTANT, timezone.now()
+                MESSAGE_TYPE_ERROR, ERR_MSG_UNEXPECTED, SENDER_ASSISTANT
             )
 
     async def send_message_to_group(
-        self, message_type: str, message: str, sender: str, timestamp: datetime
+        self, message_type: str, message: str, sender: str
     ) -> None:
         """Send a message to the group channel."""
         print("Sending message to group")
@@ -99,7 +107,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 "type": message_type,
                 "message": message,
                 "sender": sender,
-                "timestamp": timestamp.isoformat(),
+                "timestamp": self.current_time,
             },
         )
 
