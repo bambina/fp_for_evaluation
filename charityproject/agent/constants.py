@@ -1,8 +1,16 @@
+ERR_MISSING_FIELDS = "Missing required fields"
 ERR_INVALID_JSON = "Invalid JSON received"
 ERR_UNEXPECTED_LOG = "Unexpected error occurred: {error}."
 MESSAGE_TYPE_ASSISTANT = "assistant.message"
 MESSAGE_TYPE_ERROR = "error.message"
+MESSAGE_TYPE_CLOSE = "websocket.close"
 ERR_MSG_UNEXPECTED = "Unexpected error occurred. We apologize for the inconvenience. Please try again after a while."
+ERR_MSG_MISSING_FIELDS = (
+    "Required fields are missing. Please provide both 'message' and 'sender' fields."
+)
+ERR_MSG_INVALID_JSON = (
+    "Invalid JSON format. Please check the message format and try again."
+)
 UNAUTHORIZED_ACCESS_CODE = 4001
 SENDER_ASSISTANT = "assistant"
 

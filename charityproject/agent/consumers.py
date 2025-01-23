@@ -29,6 +29,8 @@ class ChatConsumer(AsyncWebsocketConsumer):
         """Connection event handler provided by AsyncWebsocketConsumer."""
         self.room_name = self.scope["url_route"]["kwargs"]["room_name"]
         self.room_group_name = f"chat_{self.room_name}"
+        # Accept connection
+        await self.accept()
         # Verify session ID and handle unauthorized access
         if not verify_session_id(self.room_name):
             logger.warning(
@@ -38,7 +40,6 @@ class ChatConsumer(AsyncWebsocketConsumer):
             return
         # Add user to the chat room group
         await self.channel_layer.group_add(self.room_group_name, self.channel_name)
-        await self.accept()
         logger.info(f"New connection established in room: {self.room_name}")
         # Send a welcome message to the user
         await self.send_message_to_group(
@@ -65,6 +66,15 @@ class ChatConsumer(AsyncWebsocketConsumer):
             data = json.loads(text_data)
             message = data.get("message")
             sender = data.get("sender")
+
+            # Check if required fields are present
+            if not sender or not message:
+                logger.error(ERR_MISSING_FIELDS)
+                await self.send_message_to_group(
+                    MESSAGE_TYPE_ERROR, ERR_MSG_MISSING_FIELDS, SENDER_ASSISTANT
+                )
+                return
+
             # Save user message to chat history
             RedisChatHistoryService.save_message(
                 self.room_name, sender, message, self.current_time
@@ -89,9 +99,12 @@ class ChatConsumer(AsyncWebsocketConsumer):
                     self.current_time,
                 )
         except json.JSONDecodeError:
-            logger.error(ERR_INVALID_JSON, exc_info=True)
+            logger.error(ERR_INVALID_JSON)
+            await self.send_message_to_group(
+                MESSAGE_TYPE_ERROR, ERR_MSG_INVALID_JSON, SENDER_ASSISTANT
+            )
         except Exception as e:
-            logger.error(ERR_UNEXPECTED_LOG.format(error=str(e)), exc_info=True)
+            logger.error(ERR_UNEXPECTED_LOG.format(error=str(e)))
             await self.send_message_to_group(
                 MESSAGE_TYPE_ERROR, ERR_MSG_UNEXPECTED, SENDER_ASSISTANT
             )
