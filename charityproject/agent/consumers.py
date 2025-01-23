@@ -1,16 +1,16 @@
-import json
-import logging
+import json, logging
 from typing import Dict
 
 from django.utils import timezone
 from channels.generic.websocket import AsyncWebsocketConsumer
+
+from core.utils import *
+from core.constants import *
 from agent.constants import *
 from agent.utils import *
 from agent.services import *
-from semanticsearch.services import *
 from agent.orchestrators import *
-from core.utils import *
-from core.constants import *
+from semanticsearch.services import *
 
 logger = logging.getLogger(PROJECT_LOGGER_NAME)
 
@@ -113,7 +113,6 @@ class ChatConsumer(AsyncWebsocketConsumer):
         self, message_type: str, message: str, sender: str
     ) -> None:
         """Send a message to the group channel."""
-        print("Sending message to group")
         await self.channel_layer.group_send(
             self.room_group_name,
             {
