@@ -1,5 +1,6 @@
 {% extends "core/base.html" %}
 {% load bootstrap_icons %}
+{% load pagination_utils %}
 {% block content %}
     <div class="container py-3 mt-5">
         <h1 class="text-center mb-4 mt-5">Sponsor a Child</h1>
@@ -67,7 +68,7 @@
                 {% if children.has_previous %}
                     <li class="page-item">
                         <a class="page-link"
-                           href="?{{ request.GET.urlencode }}&page={{ children.previous_page_number }}">Previous</a>
+                           href="{% pagination_query_params page=children.previous_page_number %}">Previous</a>
                     </li>
                 {% else %}
                     <li class="page-item disabled">
@@ -82,8 +83,7 @@
                         </li>
                     {% else %}
                         <li class="page-item">
-                            <a class="page-link"
-                               href="?{{ request.GET.urlencode }}&page={{ page_num }}">{{ page_num }}</a>
+                            <a class="page-link" href="{% pagination_query_params page=page_num %}">{{ page_num }}</a>
                         </li>
                     {% endif %}
                 {% endfor %}
@@ -91,7 +91,7 @@
                 {% if children.has_next %}
                     <li class="page-item">
                         <a class="page-link"
-                           href="?{{ request.GET.urlencode }}&page={{ children.next_page_number }}">Next</a>
+                           href="{% pagination_query_params page=children.next_page_number %}">Next</a>
                     </li>
                 {% else %}
                     <li class="page-item disabled">

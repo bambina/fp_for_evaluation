@@ -11,6 +11,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.shortcuts import redirect
 from django.contrib import messages
 from django.http import JsonResponse
+from sponsors.constants import *
 
 
 def child_list(request):
@@ -103,6 +104,6 @@ def get_filtered_children(search_form):
 
 def paginate_children(children, request):
     """Paginate the child data."""
-    paginator = Paginator(children, 6)
+    paginator = Paginator(children, CHILDREN_ITEMS_PER_PAGE)
     page_number = request.GET.get("page")
     return paginator.get_page(page_number)

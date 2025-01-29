@@ -1,0 +1,130 @@
+import pytest
+from django.urls import reverse
+
+from model_bakery import baker
+from sponsors.models import *
+from sponsors.constants import *
+
+
+@pytest.mark.django_db
+class TestSponsorViews:
+    @pytest.fixture
+    def list_url(self):
+        # Set the URL to the Sponsor a Child page
+        return reverse("sponsors:child_list")
+
+    @pytest.fixture
+    def children_data(self):
+        gender1 = baker.make(Gender, name="Male")
+        gender2 = baker.make(Gender, name="Female")
+        country1 = baker.make(Country, name="Uganda")
+        country2 = baker.make(Country, name="Kenya")
+
+        baker.make(Child, name="Carlos", age=10, country=country1, gender=gender1)
+        baker.make(Child, name="John", age=7, country=country2, gender=gender1)
+        baker.make(Child, name="Maria", age=5, country=country2, gender=gender2)
+        return {"kenya": country2}
+
+    @pytest.fixture
+    def paginated_children(self):
+        """Create 10 children for testing pagination (6 per page)"""
+        country = baker.make(Country, name="Kenya")
+        gender = baker.make(Gender, name="Male")
+        baker.make(Child, _quantity=10, country=country, gender=gender)
+        return Child.objects.all().order_by("name")
+
+    # @pytest.fixture
+    # def detail_url(self):
+    #     # Set the URL to the Sponsor a Child page
+    #     return reverse("sponsors:child_detail", args=[1])
+
+    def test_child_list_when_no_children_exists(self, client, list_url):
+        """
+        Test if the page:
+        1. Returns 200 status code
+        2. Shows "Sponsor a Child" title
+        3. Shows "No children found" message when database is empty
+        """
+        response = client.get(list_url)
+        assert response.status_code == 200
+        decoded_content = response.content.decode("utf-8")
+        assert "Sponsor a Child" in decoded_content
+        assert "No children found matching your criteria." in decoded_content
+
+    def test_child_list_filters_by_multiple_conditions(
+        self, client, list_url, children_data
+    ):
+        """
+        Test if the page correctly filters children by multiple conditions:
+        - Country (Kenya)
+        - Gender (Girls)
+        - Max Age (5)
+        """
+        form_data = {
+            "country": children_data["kenya"].id,
+            "gender": "Girls",
+            "max_age": 5,
+        }
+        response = client.get(list_url, form_data)
+        decoded_content = response.content.decode("utf-8")
+        # Should show only one child
+        assert "Maria" in decoded_content
+        assert "Carlos" not in decoded_content
+        assert "John" not in decoded_content
+
+    def test_child_list_shows_no_results_for_country_without_children(
+        self, client, list_url, children_data
+    ):
+        """Test if the page shows 'no results' message when searching for a country that has no children"""
+        empty_country = baker.make(Country)
+
+        form_data = {"country": empty_country.id}
+        response = client.get(list_url, form_data)
+        content = response.content.decode("utf-8")
+        assert "No children found matching your criteria." in content
+
+    def test_child_list_shows_error_for_invalid_country_id(
+        self, client, list_url, children_data
+    ):
+        """Test if the form shows validation error when selecting a non-existent country ID"""
+        NON_EXISTENT_COUNTRY_ID = 999
+        form_data = {"country": NON_EXISTENT_COUNTRY_ID}
+
+        response = client.get(list_url, form_data)
+        content = response.content.decode("utf-8")
+        assert (
+            "Select a valid choice. That choice is not one of the available choices."
+            in content
+        )
+
+    def test_child_list_pagination_second_page(
+        self, client, list_url, paginated_children
+    ):
+        """Test if pagination shows correct children on the second page"""
+        # Get second page
+        response = client.get(list_url, {"page": 2})
+        content = response.content.decode("utf-8")
+
+        # Assertions
+        assert response.status_code == 200
+        assert '<a class="page-link" href="?page=1">1</a>' in content
+        assert '<a class="page-link" href="#">2</a>' in content
+
+        # Content assertions
+        second_page_children = paginated_children[CHILDREN_ITEMS_PER_PAGE:]
+        for child in second_page_children:
+            assert child.name in content
+
+    # def test_child_list_pagination_invalid_page(self, client, list_url):
+    #     """Test if pagination handles invalid page numbers gracefully"""
+    #     response = client.get(list_url, {"page": 999})
+    #     assert response.status_code == 404  # Django's default behavior for invalid pages
+
+    # def test_child_list_pagination_with_query_params(self, client, list_url, paginated_children):
+    #     """Test if pagination works correctly with additional query parameters"""
+    #     response = client.get(list_url, {"page": 2, "search": "test"})
+    #     content = response.content.decode("utf-8")
+
+    #     assert response.status_code == 200
+    #     assert '<a class="page-link" href="?search=test&page=1">Previous</a>' in content
+    #     assert '<a class="page-link" href="?search=test&page=1">1</a>' in content
