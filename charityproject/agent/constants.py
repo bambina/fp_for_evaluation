@@ -22,7 +22,10 @@ RELEVANT_DOCS_FORMAT = "Questioin:{question}\nAnswer:{answer}\n\n"
 
 INITIAL_MSG = """Hi, I'm Nico, your assistant for The Virtual Charity!
 I'm here to support you by answering questions about our mission, activities, and donation methods.
-If you're interested in sponsoring a child, I can help you find the perfect match.
+If you're interested in sponsoring a child, I can help you search based on available information.
+
+You can find children based on country, gender, age, birthday, and keywords in their profile.
+Please note that I can only provide information that is listed in the profile.
 
 For example, try asking me:
 - What is The Virtual Charity's mission?
