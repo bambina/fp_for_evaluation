@@ -72,11 +72,6 @@ class OpenAIInteractionOrchestrator:
         Build filters for fetching a child in the Sponsor a Child program.
         """
         filters = {}
-        profile_q = Q()
-        num_children = 1
-        print(f"\nArguments: {arguments}\n")
-        if "num_children" in arguments and arguments["num_children"]:
-            num_children = arguments["num_children"]
         if "gender" in arguments and arguments["gender"]:
             filters["gender__name__iexact"] = arguments["gender"]
         if "country" in arguments and arguments["country"]:
@@ -89,37 +84,28 @@ class OpenAIInteractionOrchestrator:
             filters["date_of_birth__month"] = arguments["birth_month"]
         if "birth_day" in arguments and arguments["birth_day"] is not None:
             filters["date_of_birth__day"] = arguments["birth_day"]
-        if "profile_description" in arguments and arguments["profile_description"]:
-            keywords = arguments["profile_description"].split()
-            for keyword in keywords:
-                profile_q &= Q(profile_description__icontains=keyword)
-        final_q = Q(**filters) & profile_q if profile_q else Q(**filters)
-        # print(f"\nFilters: {final_q}\n")
-        return final_q, num_children
+        return filters
 
     @staticmethod
     async def fetch_children(arguments):
         """
         Fetch children in the Sponsor a Child program based on the given attributes.
         """
-        # Build filters for fetching a child
-        filters, num_children = OpenAIInteractionOrchestrator.build_child_filters(
-            arguments
-        )
-        log_user_test(f"filters: {filters}\n")
+        # Build filters for fetching children
+        filters = OpenAIInteractionOrchestrator.build_child_filters(arguments)
+        print(f"\nArguments: {arguments}\n")
+        print(f"\nFilters: {filters}\n")
+        # log_user_test(f"filters: {filters}\n")
         # Fetch child based on attributes
         children = []
+        child_found = True
         async for child in (
-            Child.objects.filter(filters)
+            Child.objects.filter(**filters)
             .select_related("country", "gender")
-            .all()[:num_children]
+            .all()[:3]
         ):
             children.append(child)
-        print(f"\nfilters: {filters}\n")
-        print(f"\nN: {num_children}\n")
-        print(f"\nchildren: {children}\n")
-        log_user_test(f"children: {children}\n")
-        child_found = True
+
         if not children:
             child_found = False
             random_birth_month = (datetime.now().second % 12) + 1
@@ -130,4 +116,6 @@ class OpenAIInteractionOrchestrator:
             )
             children.append(child)
 
+        print(f"\nchildren: {children}\n")
+        # log_user_test(f"children: {children}\n")
         return children, child_found
