@@ -42,14 +42,13 @@ class OpenAIInteractionOrchestrator:
                     SELECTED_MODEL, system_content, chat_history, NOT_GIVEN
                 )
             # Search for a child in the Sponsor a Child program
-            elif function_name == "fetch_child":
+            elif function_name == "fetch_children":
                 children, found = await OpenAIInteractionOrchestrator.fetch_children(
                     arguments
                 )
                 system_content = OpenAIClientService.compose_child_introduction(
                     children, found
                 )
-                # print(f"\nSystem content: {system_content}\n")
                 # Use ChatGPT to format the search result
                 completion = OpenAIClientService.chat_completion(
                     SELECTED_MODEL, system_content, chat_history, NOT_GIVEN
@@ -96,13 +95,13 @@ class OpenAIInteractionOrchestrator:
         print(f"\nArguments: {arguments}\n")
         print(f"\nFilters: {filters}\n")
         # log_user_test(f"filters: {filters}\n")
-        # Fetch child based on attributes
+        # Fetch children based on attributes
         children = []
         child_found = True
         async for child in (
             Child.objects.filter(**filters)
             .select_related("country", "gender")
-            .all()[:3]
+            .all()[:MAX_CHILDREN_RESULTS]
         ):
             children.append(child)
 
