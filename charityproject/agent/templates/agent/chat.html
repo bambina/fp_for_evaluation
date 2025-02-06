@@ -1,9 +1,13 @@
 {% extends "core/base.html" %}
+{% load static %}
+{% block extra_head %}
+    <link rel="stylesheet" href="{% static 'agent/css/styles.css' %}">
+{% endblock %}
 {% load bootstrap_icons %}
 {% block content %}
     <div class="container py-3 mt-5">
         <!-- Chat Container -->
-        <div class="container pt-1 pb-5">
+        <div class="container pt-1 chat_container">
             <div class="row justify-content-center">
                 <div class="col-md-8 pt-2 pb-3" id="chat-container"></div>
             </div>
@@ -31,7 +35,6 @@
     </div>
 {% endblock %}
 {% block extra_static %}
-    {% load static %}
     {{ request.get_host | json_script:"host-name" }}
     {{ room_name | json_script:"room-name" }}
     <script src="{% static 'agent/js/chat.js' %}"></script>

@@ -43,37 +43,11 @@ class OpenAIInteractionOrchestrator:
                 )
             # Search for a child in the Sponsor a Child program
             elif function_name == "fetch_child":
-                # Build filters for fetching a child
-                filters, num_children = (
-                    OpenAIInteractionOrchestrator.build_child_filters(arguments)
+                children, found = await OpenAIInteractionOrchestrator.fetch_children(
+                    arguments
                 )
-                log_user_test(f"filters: {filters}\n")
-                # Fetch child based on attributes
-                children = []
-                async for child in (
-                    Child.objects.filter(filters)
-                    .select_related("country", "gender")
-                    .all()[:num_children]
-                ):
-                    children.append(child)
-                print(f"\nfilters: {filters}\n")
-                print(f"\nN: {num_children}\n")
-                print(f"\nchildren: {children}\n")
-                log_user_test(f"children: {children}\n")
-                child_found = True
-                if not children:
-                    child_found = False
-                    random_birth_month = (datetime.now().second % 12) + 1
-                    child = (
-                        await Child.objects.filter(
-                            date_of_birth__month=random_birth_month
-                        )
-                        .select_related("country", "gender")
-                        .afirst()
-                    )
-
                 system_content = OpenAIClientService.compose_child_introduction(
-                    child, child_found
+                    children, found
                 )
                 # print(f"\nSystem content: {system_content}\n")
                 # Use ChatGPT to format the search result
@@ -122,3 +96,38 @@ class OpenAIInteractionOrchestrator:
         final_q = Q(**filters) & profile_q if profile_q else Q(**filters)
         # print(f"\nFilters: {final_q}\n")
         return final_q, num_children
+
+    @staticmethod
+    async def fetch_children(arguments):
+        """
+        Fetch children in the Sponsor a Child program based on the given attributes.
+        """
+        # Build filters for fetching a child
+        filters, num_children = OpenAIInteractionOrchestrator.build_child_filters(
+            arguments
+        )
+        log_user_test(f"filters: {filters}\n")
+        # Fetch child based on attributes
+        children = []
+        async for child in (
+            Child.objects.filter(filters)
+            .select_related("country", "gender")
+            .all()[:num_children]
+        ):
+            children.append(child)
+        print(f"\nfilters: {filters}\n")
+        print(f"\nN: {num_children}\n")
+        print(f"\nchildren: {children}\n")
+        log_user_test(f"children: {children}\n")
+        child_found = True
+        if not children:
+            child_found = False
+            random_birth_month = (datetime.now().second % 12) + 1
+            child = (
+                await Child.objects.filter(date_of_birth__month=random_birth_month)
+                .select_related("country", "gender")
+                .afirst()
+            )
+            children.append(child)
+
+        return children, child_found
