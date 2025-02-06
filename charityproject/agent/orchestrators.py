@@ -19,7 +19,7 @@ class OpenAIInteractionOrchestrator:
         chat_history = RedisChatHistoryService.get_chat_history(room_name)
         # Get a response from the OpenAI model
         completion = OpenAIClientService.chat_completion(
-            USE_INEXPENSIVE_MODEL, SYSTEM_CONTENT_1, chat_history, TOOLS
+            SELECTED_MODEL, SYSTEM_CONTENT_1, chat_history, TOOLS
         )
         finish_reason = completion.choices[0].finish_reason
         # Check if the model intends to call an application function
@@ -39,7 +39,7 @@ class OpenAIInteractionOrchestrator:
                 system_content = OpenAIClientService.compose_relevant_docs(result)
                 # Get a completion from the OpenAI model using the retrieved data
                 completion = OpenAIClientService.chat_completion(
-                    USE_INEXPENSIVE_MODEL, system_content, chat_history, NOT_GIVEN
+                    SELECTED_MODEL, system_content, chat_history, NOT_GIVEN
                 )
             # Search for a child in the Sponsor a Child program
             elif function_name == "fetch_child":
@@ -78,7 +78,7 @@ class OpenAIInteractionOrchestrator:
                 # print(f"\nSystem content: {system_content}\n")
                 # Use ChatGPT to format the search result
                 completion = OpenAIClientService.chat_completion(
-                    USE_INEXPENSIVE_MODEL, system_content, chat_history, NOT_GIVEN
+                    SELECTED_MODEL, system_content, chat_history, NOT_GIVEN
                 )
             else:
                 return f"OpenAI model wants to call a function not defined: {function_name}"

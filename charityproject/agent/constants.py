@@ -16,7 +16,7 @@ SENDER_ASSISTANT = "assistant"
 
 # OpenAI API - prompt templates
 # https://platform.openai.com/docs/models/models-overview
-USE_INEXPENSIVE_MODEL = "gpt-3.5-turbo"
+SELECTED_MODEL = "gpt-3.5-turbo"
 AVAILABLE_MODELS = ["gpt-4o", "gpt-4o-mini", "gpt-4-turbo", "gpt-3.5-turbo"]
 RELEVANT_DOCS_FORMAT = "Questioin:{question}\nAnswer:{answer}\n\n"
 
