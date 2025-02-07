@@ -1,4 +1,5 @@
 from django.db import models
+from core.constants import *
 
 
 class Country(models.Model):
@@ -34,7 +35,7 @@ class Gender(models.Model):
 
 
 class Child(models.Model):
-    name = models.CharField(max_length=255)
+    name = models.CharField(max_length=MAX_CHILD_NAME_LEN)
     age = models.PositiveIntegerField()
     gender = models.ForeignKey(
         Gender, on_delete=models.PROTECT, related_name="children"
@@ -42,7 +43,7 @@ class Child(models.Model):
     country = models.ForeignKey(
         Country, on_delete=models.CASCADE, related_name="children"
     )
-    profile_description = models.TextField(blank=True)
+    profile_description = models.TextField(max_length=MAX_CHILD_PROFILE_LEN, blank=True)
     date_of_birth = models.DateField()
     image = models.ImageField(upload_to="children/", blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)

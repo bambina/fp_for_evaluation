@@ -11,3 +11,9 @@ ALPHA_2_CODE_INVALID_ERR = (
     "This field must contain exactly 2 uppercase alphabetic characters."
 )
 NUMERIC_CODE_INVALID_ERR = "This field must contain exactly 3 numeric digits."
+
+# Field length constraints for relational and vector databases
+MAX_QUESTION_LEN = 255
+MAX_ANSWER_LEN = 2048
+MAX_CHILD_NAME_LEN = 255
+MAX_CHILD_PROFILE_LEN = 2048

@@ -51,7 +51,7 @@ class MilvusClientService:
                 print(f"Failed to initialize Milvus client: {e}")
 
     @classmethod
-    def hybrid_search(cls, query_vectors: np.ndarray, top_k: int = 3):
+    def search_faq_hybrid(cls, query_vectors: np.ndarray, top_k: int = 3):
         if cls._client is None:
             cls.init_client()
 
@@ -73,5 +73,19 @@ class MilvusClientService:
             ],
             ranker=WeightedRanker(0.7, 0.3),
             output_fields=["question", "answer"],
+            limit=top_k,
+        )
+
+    @classmethod
+    def search_child_profiles(cls, query_vectors: np.ndarray, top_k: int = 3):
+        if cls._client is None:
+            cls.init_client()
+
+        return cls._client.search(
+            collection_name=CHILD_COLLECTION_NAME,
+            data=query_vectors,
+            anns_field="profile_description_vector",
+            search_params={"metric_type": "IP"},
+            output_fields=["id", "name", "profile_description"],
             limit=top_k,
         )

@@ -1,9 +1,11 @@
 from django.db import models
 
+from core.constants import *
+
 
 class FAQEntry(models.Model):
-    question = models.CharField(max_length=255)
-    answer = models.TextField()
+    question = models.CharField(max_length=MAX_QUESTION_LEN)
+    answer = models.TextField(max_length=MAX_ANSWER_LEN)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     deleted_at = models.DateTimeField(null=True, blank=True)
