@@ -15,12 +15,6 @@ class Command(BaseCommand):
     help = "Populates the vector database with Child data.\n\n"
 
     def handle(self, *args, **kwargs):
-        vec_soccer = USEModelService.get_vector_representation(["soccer"])
-        vec_football = USEModelService.get_vector_representation(["football"])
-
-        similarity = np.dot(vec_soccer, vec_football.T)  # 内積で類似度計算
-        print(f"Soccer と Football のベクトル類似度: {similarity}")
-
         # Init client
         client = MilvusClient(settings.VECTOR_DB_FILE)
 

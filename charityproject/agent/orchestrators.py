@@ -1,4 +1,4 @@
-import ast
+import ast, random
 from datetime import datetime
 
 from openai import NOT_GIVEN
@@ -66,55 +66,131 @@ class OpenAIInteractionOrchestrator:
         }
 
     @staticmethod
-    def build_child_filters(arguments):
+    def build_structured_child_filters(arguments):
         """
-        Build filters for fetching a child in the Sponsor a Child program.
+        Build filters for fetching a child using structured data.
         """
         filters = {}
-        if "gender" in arguments and arguments["gender"]:
+        if arguments.get("gender"):
             filters["gender__name__iexact"] = arguments["gender"]
-        if "country" in arguments and arguments["country"]:
+        if arguments.get("country"):
             filters["country__name__iexact"] = arguments["country"]
-        if "min_age" in arguments and arguments["min_age"] is not None:
+        if isinstance(arguments.get("min_age"), int):
             filters["age__gte"] = arguments["min_age"]
-        if "max_age" in arguments and arguments["max_age"] is not None:
+        if isinstance(arguments.get("max_age"), int):
             filters["age__lte"] = arguments["max_age"]
-        if "birth_month" in arguments and arguments["birth_month"] is not None:
+        if isinstance(arguments.get("birth_month"), int):
             filters["date_of_birth__month"] = arguments["birth_month"]
-        if "birth_day" in arguments and arguments["birth_day"] is not None:
+        if isinstance(arguments.get("birth_day"), int):
             filters["date_of_birth__day"] = arguments["birth_day"]
         return filters
+
+    @staticmethod
+    async def fetch_children_by_filters(arguments):
+        """
+        Fetch children in the Sponsor a Child program based on structured attributes.
+        """
+        # Build filters for fetching children
+        filters = OpenAIInteractionOrchestrator.build_structured_child_filters(
+            arguments
+        )
+
+        # Fetch children based on attributes
+        if not filters:
+            return [], True
+        return [
+            child.id
+            async for child in Child.objects.filter(**filters)
+            .select_related("country", "gender")
+            .all()
+        ], False
+
+    @staticmethod
+    async def fetch_children_by_profile_description(arguments):
+        """
+        Fetch children in the Sponsor a Child program based on profile description.
+        """
+        child_ids = []
+        no_filter = True
+        if arguments.get("profile_description"):
+            no_filter = False
+            query = arguments["profile_description"]
+            query_vectors = USEModelService.get_vector_representation([query])
+            result = MilvusClientService.search_child_profiles(query_vectors, 5)
+            for hits in result:
+                for hit in hits:
+                    child_ids.append(hit["entity"]["id"])
+        return child_ids, no_filter
+
+    @staticmethod
+    def merge_children_results(structured_match_ids, semantic_match_ids):
+        """
+        Merge results while preserving the ranking of semantic search.
+        Returns IDs that appear in both structured and semantic search.
+        """
+        structured_set = set(structured_match_ids)
+        return [id for id in semantic_match_ids if id in structured_set]
 
     @staticmethod
     async def fetch_children(arguments):
         """
         Fetch children in the Sponsor a Child program based on the given attributes.
+
+        Returns:
+            children (List[Child]): A list of children found through search or random selection.
+            child_found (bool): True if children were found through search, False if a random selection was made.
         """
-        # Build filters for fetching children
-        filters = OpenAIInteractionOrchestrator.build_child_filters(arguments)
-        print(f"\nArguments: {arguments}\n")
-        print(f"\nFilters: {filters}\n")
-        # log_user_test(f"filters: {filters}\n")
-        # Fetch children based on attributes
-        children = []
         child_found = True
-        async for child in (
-            Child.objects.filter(**filters)
-            .select_related("country", "gender")
-            .all()[:MAX_CHILDREN_RESULTS]
-        ):
-            children.append(child)
 
-        if not children:
-            child_found = False
-            random_birth_month = (datetime.now().second % 12) + 1
-            child = (
-                await Child.objects.filter(date_of_birth__month=random_birth_month)
-                .select_related("country", "gender")
-                .afirst()
+        # Perform structured and semantic search
+        structured_match_ids, is_structured_filter_missing = (
+            await OpenAIInteractionOrchestrator.fetch_children_by_filters(arguments)
+        )
+        semantic_match_ids, is_semantic_filter_missing = (
+            await OpenAIInteractionOrchestrator.fetch_children_by_profile_description(
+                arguments
             )
-            children.append(child)
+        )
 
-        print(f"\nchildren: {children}\n")
-        # log_user_test(f"children: {children}\n")
+        # Determine child IDs based on search results
+        if is_structured_filter_missing:
+            child_ids = semantic_match_ids
+        elif is_semantic_filter_missing:
+            child_ids = structured_match_ids
+        else:
+            child_ids = OpenAIInteractionOrchestrator.merge_children_results(
+                structured_match_ids, semantic_match_ids
+            )
+
+        # Retrieve children based on the determined IDs
+        if child_ids:
+            children_dict = {
+                child.id: child
+                async for child in Child.objects.filter(
+                    id__in=child_ids[:3]
+                ).select_related("country", "gender")
+            }
+            children = [
+                children_dict[id] for id in child_ids[:3] if id in children_dict
+            ]
+        else:
+            # If no children were found, select a random child
+            child_found = False
+            children = [await OpenAIInteractionOrchestrator.get_random_child()]
+
         return children, child_found
+
+    @staticmethod
+    async def get_random_child():
+        """
+        Retrieve a random child from the database.
+        """
+        child_count = await Child.objects.acount()
+        random_offset = random.randint(0, child_count - 1)
+
+        return (
+            await Child.objects.all()
+            .select_related("country", "gender")
+            .order_by("id")[random_offset : random_offset + 1]
+            .afirst()
+        )
