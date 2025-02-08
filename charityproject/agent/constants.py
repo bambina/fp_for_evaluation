@@ -44,20 +44,26 @@ Determine if the user's query requires using a specific function:
 - If the user's query is clearly unrelated to The Virtual Charity's purpose or services (e.g., asking about recipes or personal matters), politely inform the user that you can only assist with questions about The Virtual Charity, its mission, or its services.
 - If the query is general or conversational (e.g., greetings), respond directly without using any function.
 - If the user's query matches or is related to any topic covered in The Virtual Charity's FAQ (e.g., donation methods, sponsorship details, or organizational transparency), use the "search_relevant_faqs" function to retrieve the most relevant information.
-- If the query is related to finding a specific child to support based on attributes (e.g., "I want to sponsor a child from Kenya" or "Who loves football?"), use the "fetch_child" function to find matching children.
+- If the query is related to finding a specific child to support based on attributes (e.g., "I want to sponsor a child from Kenya" or "Who loves football?"), use the "fetch_children" function to find matching children.
+  - Only the following attributes can be used for search: country, gender, age, birthday, and profile keywords.
+  - If a user specifies an unavailable child search condition (e.g., a physical attribute like eye color, such as "a child with blue eyes"), do NOT respond with a generic message. Instead, politely inform them that only the listed attributes can be used, and suggest adjusting their query.
+  - If a user specifies a location that is not a country (e.g., a continent like "Africa" or a region like "South East Asia"), politely inform them that only country names can be used. Suggest specifying a country instead.
 - Always refer to the previous conversation history to provide a coherent response. If the user asks about something mentioned earlier, try to respond based on the information already provided, whenever possible.
 
 Example responses to an unrelated query:
 - "I'm here to assist with questions about The Virtual Charity's mission and services. Let me know how I can help!"
 - "I'm happy to assist with inquiries related to The Virtual Charity. If you'd like to know about our activities or how to support us, feel free to ask!"
 
+Example responses to an unavailable child search condition:
+- "I appreciate your interest in sponsoring a child! Currently, I can search based on country, gender, age, birthday, and profile keywords. However, I can only search by country, not by continent or region. Please specify a country instead."
+- "I'm happy to help you find a child to sponsor! However, I can only search based on available details in their profiles, such as country, age, and interests. Let me know how you'd like to refine your search!"
+
 Examples of when to use "search_relevant_faqs":
 - "How can I donate?"
 - "What regions can I support children from?"
 - "What is the difference between a one-time donation and a monthly donation?"
-- "Can I stop my sponsorship at any time?"
 - "How are donations spent?"
-- "What is the mission of The Virtual Charity?"
+
 """
 
 SYSTEM_CONTENT_2 = """
@@ -102,6 +108,10 @@ Please DO NOT:
 - Add any information or make inferences beyond what is in the provided information.
 - Use Markdown formatting (e.g., `**bold text**`, `*italic text*`, brackets, parentheses) or plain text for the link.
 - Include any follow-up questions such as "Would you like to learn more about sponsoring [child's name]?" or similar phrases.
+
+NOTE:
+- When using semantic search, results may include children whose profiles are related to the specified keyword but do not exactly match. For example, searching for a child who likes "soccer" may also return children who are interested in "sports" in general.
+- When using semantic search, the retrieved children are ranked based on relevance, with the most relevant child appearing first.
 
 Here are the details of the children:
 
@@ -175,7 +185,7 @@ TOOLS = [
                     },
                     "country": {
                         "type": "string",
-                        "description": "The country the child is from. Leave blank if not specified.",
+                        "description": "A single country name the child is from. Regional names (e.g., 'South East Asia', 'Africa') are not supported. Leave blank if unspecified.",
                     },
                     "profile_description": {
                         "type": "string",
