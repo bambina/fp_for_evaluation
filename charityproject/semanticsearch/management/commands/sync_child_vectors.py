@@ -12,7 +12,7 @@ from core.constants import *
 
 class Command(BaseCommand):
     # python manage.py sync_child_vectors --help
-    help = "Populates the vector database with Child data.\n\n"
+    help = "Sync child data from the relational DB to the vector DB.\n\n"
 
     def handle(self, *args, **kwargs):
         # Init client
