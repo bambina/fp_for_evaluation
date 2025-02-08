@@ -65,7 +65,6 @@ class OpenAIClientService:
                     answer=hit["entity"]["answer"],
                     link=faq_url,
                 )
-            print(SYSTEM_CONTENT_2 + docs)
         return SYSTEM_CONTENT_2 + docs
 
     @classmethod

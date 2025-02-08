@@ -4,6 +4,7 @@ from django.urls import reverse
 from model_bakery import baker
 from sponsors.models import *
 from sponsors.constants import *
+from django.core.paginator import Paginator
 
 
 @pytest.mark.django_db
@@ -12,6 +13,11 @@ class TestSponsorViews:
     def list_url(self):
         # Set the URL to the Sponsor a Child page
         return reverse("sponsors:child_list")
+
+    # @pytest.fixture
+    # def detail_url(self):
+    #     # Set the URL to the Sponsor a Child page
+    #     return reverse("sponsors:child_detail", args=[1])
 
     @pytest.fixture
     def children_data(self):
@@ -27,16 +33,13 @@ class TestSponsorViews:
 
     @pytest.fixture
     def paginated_children(self):
-        """Create 10 children for testing pagination (6 per page)"""
+        """Create 20 children for testing pagination (6 per page)"""
         country = baker.make(Country, name="Kenya")
-        gender = baker.make(Gender, name="Male")
-        baker.make(Child, _quantity=10, country=country, gender=gender)
+        gender1 = baker.make(Gender, name="Male")
+        gender2 = baker.make(Gender, name="Female")
+        baker.make(Child, _quantity=10, country=country, gender=gender1)
+        baker.make(Child, _quantity=10, country=country, gender=gender2)
         return Child.objects.all().order_by("name")
-
-    # @pytest.fixture
-    # def detail_url(self):
-    #     # Set the URL to the Sponsor a Child page
-    #     return reverse("sponsors:child_detail", args=[1])
 
     def test_child_list_when_no_children_exists(self, client, list_url):
         """
@@ -111,20 +114,29 @@ class TestSponsorViews:
         assert '<a class="page-link" href="#">2</a>' in content
 
         # Content assertions
-        second_page_children = paginated_children[CHILDREN_ITEMS_PER_PAGE:]
+        paginator = Paginator(paginated_children, CHILDREN_ITEMS_PER_PAGE)
+        second_page_children = paginator.get_page(2)
         for child in second_page_children:
             assert child.name in content
 
-    # def test_child_list_pagination_invalid_page(self, client, list_url):
-    #     """Test if pagination handles invalid page numbers gracefully"""
-    #     response = client.get(list_url, {"page": 999})
-    #     assert response.status_code == 404  # Django's default behavior for invalid pages
+    def test_child_list_pagination_with_query_params(
+        self, client, list_url, paginated_children
+    ):
+        """Test if pagination works correctly with additional query parameters"""
+        response = client.get(list_url, {"page": 2, "gender": "Girls"})
+        content = response.content.decode("utf-8")
 
-    # def test_child_list_pagination_with_query_params(self, client, list_url, paginated_children):
-    #     """Test if pagination works correctly with additional query parameters"""
-    #     response = client.get(list_url, {"page": 2, "search": "test"})
-    #     content = response.content.decode("utf-8")
+        # Assertions
+        assert response.status_code == 200
+        assert 'href="?page=1&amp;gender=Girls">Previous</a>' in content
+        assert '<a class="page-link" href="#">2</a>' in content
 
-    #     assert response.status_code == 200
-    #     assert '<a class="page-link" href="?search=test&page=1">Previous</a>' in content
-    #     assert '<a class="page-link" href="?search=test&page=1">1</a>' in content
+        # Content assertions
+        female_children = paginated_children.filter(gender__name="Female").order_by(
+            "name"
+        )
+        paginator = Paginator(female_children, CHILDREN_ITEMS_PER_PAGE)
+        second_page_children = paginator.get_page(2)
+
+        for child in second_page_children:
+            assert child.name in content
