@@ -93,10 +93,9 @@ def get_filtered_children(search_form):
         max_age = search_form.cleaned_data.get("max_age")
         birth_month = search_form.cleaned_data.get("birth_month")
         birth_day = search_form.cleaned_data.get("birth_day")
-        keywords = search_form.cleaned_data.get("keywords")
 
         children = ChildRepository.fetch_filtered_by(
-            country, gender, min_age, max_age, birth_month, birth_day, keywords
+            country, gender, min_age, max_age, birth_month, birth_day
         )
 
     return children
