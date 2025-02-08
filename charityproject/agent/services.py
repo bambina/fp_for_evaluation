@@ -58,10 +58,14 @@ class OpenAIClientService:
         docs = ""
         for hits in search_result:
             for hit in hits:
+                faq_url = reverse("faq_detail", kwargs={"pk": hit["id"]})
                 docs += RELEVANT_DOCS_FORMAT.format(
+                    id=hit["id"],
                     question=hit["entity"]["question"],
                     answer=hit["entity"]["answer"],
+                    link=faq_url,
                 )
+            print(SYSTEM_CONTENT_2 + docs)
         return SYSTEM_CONTENT_2 + docs
 
     @classmethod
