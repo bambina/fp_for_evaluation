@@ -174,12 +174,12 @@ class OpenAIInteractionOrchestrator:
             children = [
                 children_dict[id] for id in child_ids[:3] if id in children_dict
             ]
-            print(f"\nChildren: {children}\n")
+            # print(f"\nChildren: {children}\n")
         else:
             # If no children were found, select a random child
             child_found = False
             children = [await OpenAIInteractionOrchestrator.get_random_child()]
-            print(f"\nRandom child: {children}\n")
+            # print(f"\nRandom child: {children}\n")
 
         return children, child_found
 
