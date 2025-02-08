@@ -3,4 +3,5 @@ from faqs import views
 
 urlpatterns = [
     path("", views.faq_list, name="faq_list"),
+    path("<int:pk>/", views.faq_detail, name="faq_detail"),
 ]
