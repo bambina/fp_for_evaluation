@@ -140,6 +140,7 @@ class OpenAIInteractionOrchestrator:
             children (List[Child]): A list of children found through search or random selection.
             child_found (bool): True if children were found through search, False if a random selection was made.
         """
+        print(f"\nArguments: {arguments}\n")
         child_found = True
 
         # Perform structured and semantic search
@@ -173,10 +174,12 @@ class OpenAIInteractionOrchestrator:
             children = [
                 children_dict[id] for id in child_ids[:3] if id in children_dict
             ]
+            print(f"\nChildren: {children}\n")
         else:
             # If no children were found, select a random child
             child_found = False
             children = [await OpenAIInteractionOrchestrator.get_random_child()]
+            print(f"\nRandom child: {children}\n")
 
         return children, child_found
 
