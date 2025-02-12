@@ -29,8 +29,8 @@ class OpenAIInteractionOrchestrator:
             arguments = ast.literal_eval(tool_function.arguments)
             # Search for data relevant to the charity
             if function_name == "search_relevant_faqs":
-                query = arguments.get("query")
-                query_vectors = USEModelService.get_vector_representation([query])
+                query = arguments.get("search_keywords")
+                query_vectors = USEModelService.get_vector_representation(query)
                 result = MilvusClientService.search_faq_hybrid(query_vectors)
                 # print(f"\nQuery: {query}\n")
                 # print(f"\nSearch result: {result}\n")
@@ -49,6 +49,10 @@ class OpenAIInteractionOrchestrator:
                 system_content = OpenAIClientService.compose_child_introduction(
                     children, found
                 )
+
+                # for child in children:
+                #     print(f"Child found: {child}")
+
                 # Use ChatGPT to format the search result
                 completion = OpenAIClientService.chat_completion(
                     SELECTED_MODEL, system_content, chat_history, NOT_GIVEN

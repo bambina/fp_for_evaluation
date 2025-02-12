@@ -55,16 +55,23 @@ class OpenAIClientService:
 
     @classmethod
     def compose_relevant_docs(cls, search_result):
+        seen_item = set()
         docs = ""
         for hits in search_result:
             for hit in hits:
-                faq_url = reverse("faq_detail", kwargs={"pk": hit["id"]})
-                docs += RELEVANT_DOCS_FORMAT.format(
-                    id=hit["id"],
-                    question=hit["entity"]["question"],
-                    answer=hit["entity"]["answer"],
-                    link=faq_url,
-                )
+                if hit["id"] not in seen_item:
+                    seen_item.add(hit["id"])
+                    faq_url = reverse("faq_detail", kwargs={"pk": hit["id"]})
+                    docs += RELEVANT_DOCS_FORMAT.format(
+                        id=hit["id"],
+                        question=hit["entity"]["question"],
+                        answer=hit["entity"]["answer"],
+                        link=faq_url,
+                    )
+                    # print(f"FAQ ID: {hit['id']}")
+                    # print(f"Distance: {hit['distance']}")
+                    # print(f"Question: {hit['entity']['question']}")
+                    # print(f"Answer: {hit['entity']['answer']}")
         return SYSTEM_CONTENT_2 + docs
 
     @classmethod
