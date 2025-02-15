@@ -1,11 +1,11 @@
 from pymilvus import MilvusClient
-from pymilvus import DataType, FieldSchema, CollectionSchema
 
 from django.core.management.base import BaseCommand
 from django.conf import settings
 from semanticsearch.services import *
 
 from faqs.models import *
+from semanticsearch.schemas import *
 from semanticsearch.constants import *
 from core.constants import *
 
@@ -22,45 +22,7 @@ class Command(BaseCommand):
         if client.has_collection(collection_name=FAQ_COLLECTION_NAME):
             client.drop_collection(collection_name=FAQ_COLLECTION_NAME)
 
-        # Define the schema fields
-        fields = [
-            FieldSchema(
-                name="id",
-                dtype=DataType.INT64,
-                is_primary=True,
-                auto_id=False,
-                description="Auto-incrementing document ID",
-            ),
-            FieldSchema(
-                name="question",
-                dtype=DataType.VARCHAR,
-                max_length=MAX_QUESTION_LEN,
-                description="Question text",
-            ),
-            FieldSchema(
-                name="answer",
-                dtype=DataType.VARCHAR,
-                max_length=MAX_ANSWER_LEN,
-                description="Answer text",
-            ),
-            FieldSchema(
-                name="question_vector",
-                dtype=DataType.FLOAT_VECTOR,
-                dim=NUM_DIM,
-                description="Question vector",
-            ),
-            FieldSchema(
-                name="answer_vector",
-                dtype=DataType.FLOAT_VECTOR,
-                dim=NUM_DIM,
-                description="Answer vector",
-            ),
-        ]
-        schema = CollectionSchema(
-            fields=fields,
-            description="Collection for storing FAQ data including questions, answers, and their corresponding vectors",
-        )
-
+        schema = create_faq_schema()
         client.create_collection(collection_name=FAQ_COLLECTION_NAME, schema=schema)
 
         # Prepare data
@@ -91,15 +53,9 @@ class Command(BaseCommand):
             res = client.insert(collection_name=FAQ_COLLECTION_NAME, data=data)
             print(res)
 
-        # Create index for vector fields
-        # https://milvus.io/api-reference/pymilvus/v2.4.x/MilvusClient/Management/create_index.md
-        index_params = client.prepare_index_params()
-        for field_name in ["question_vector", "answer_vector"]:
-            index_params.add_index(
-                field_name=field_name,
-                index_type="FLAT",
-                metric_type="IP",
-            )
+        # Create index
+        base_index_params = client.prepare_index_params()
+        index_params = create_faq_index_params(base_index_params)
         client.create_index(
             collection_name=FAQ_COLLECTION_NAME, index_params=index_params, sync=True
         )
