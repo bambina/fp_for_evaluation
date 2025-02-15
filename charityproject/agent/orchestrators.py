@@ -1,10 +1,8 @@
 import ast, random
-from datetime import datetime
 
 from openai import NOT_GIVEN
 
 from sponsors.models import Child
-from django.db.models import Q
 
 from agent.constants import *
 from agent.services import *

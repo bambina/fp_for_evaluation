@@ -3,6 +3,7 @@ from typing import Dict
 
 from django.utils import timezone
 from channels.generic.websocket import AsyncWebsocketConsumer
+from channels.db import database_sync_to_async
 
 from core.utils import *
 from core.constants import *
@@ -11,6 +12,7 @@ from agent.utils import *
 from agent.services import *
 from agent.orchestrators import *
 from semanticsearch.services import *
+from agent.models import *
 
 logger = logging.getLogger(PROJECT_LOGGER_NAME)
 
@@ -79,6 +81,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
             RedisChatHistoryService.save_message(
                 self.room_name, sender, message, self.current_time
             )
+            await self.save_message_to_db(sender, message)
             # Generate response using OpenAI API
             response = await OpenAIInteractionOrchestrator.generate_response(
                 self.room_name
@@ -98,6 +101,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
                     bot_message,
                     self.current_time,
                 )
+                await self.save_message_to_db(SENDER_ASSISTANT, bot_message)
         except json.JSONDecodeError:
             logger.error(ERR_INVALID_JSON)
             await self.send_message_to_group(
@@ -147,4 +151,10 @@ class ChatConsumer(AsyncWebsocketConsumer):
                     "timestamp": message_data["timestamp"],
                 }
             )
+        )
+
+    @database_sync_to_async
+    def save_message_to_db(self, sender: str, message: str) -> None:
+        ChatMessage.objects.create(
+            session_id=self.room_name, sender_type=sender, content=message
         )
