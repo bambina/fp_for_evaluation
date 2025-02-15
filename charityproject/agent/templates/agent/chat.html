@@ -37,5 +37,6 @@
 {% block extra_static %}
     {{ request.get_host | json_script:"host-name" }}
     {{ room_name | json_script:"room-name" }}
+    {{ sender_name_user | json_script:"sender-name-user" }}
     <script src="{% static 'agent/js/chat.js' %}"></script>
 {% endblock %}

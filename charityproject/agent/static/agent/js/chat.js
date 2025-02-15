@@ -3,6 +3,7 @@
 // The following variables are passed from the Django template:
 const hostName = JSON.parse(document.getElementById("host-name").textContent);
 const roomName = JSON.parse(document.getElementById("room-name").textContent);
+const senderNameUser = JSON.parse(document.getElementById("sender-user-name").textContent);
 // Check if the current page is loaded over HTTPS
 const wsProtocol = window.location.protocol === "https:" ? "wss://" : "ws://";
 // Construct WebSocket URL
@@ -18,7 +19,6 @@ const RECONNECT_INTERVAL = 1000 * 5;
 // Constants for the chat interface
 const ASSISTANT_DISPLAY_NAME = "Assistant Nico";
 const USER_DISPLAY_NAME = "User";
-const SENDER_NAME_USER = "user"; // Supported value for the OpenAI API
 const THINKING_MESSAGE_TEXT = "Thinking...";
 // Element IDs
 const THINKING_MESSAGE_ID = "thinkingMsg";
@@ -272,7 +272,7 @@ function sendMessage() {
   // Create a chat card for the user's message
   displayMessage(message);
   // Send the message to the chatbot
-  client.send(message, SENDER_NAME_USER);
+  client.send(message, senderNameUser);
   messageInputDom.value = "";
   // Display the "Thinking..." indicator
   appendThinkingMessage();

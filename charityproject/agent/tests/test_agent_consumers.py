@@ -99,7 +99,7 @@ async def test_receive_empty_message_data():
     response = await communicator.receive_json_from()
     assert response["type"] == MESSAGE_TYPE_ERROR
     assert response["message"] == ERR_MSG_MISSING_FIELDS
-    assert response["sender"] == SENDER_ASSISTANT
+    assert response["sender"] == MessageSender.ASSISTANT
     await communicator.disconnect()
 
 
@@ -115,5 +115,5 @@ async def test_receive_invalid_json():
     response = await communicator.receive_json_from()
     assert response["type"] == MESSAGE_TYPE_ERROR
     assert response["message"] == ERR_MSG_INVALID_JSON
-    assert response["sender"] == SENDER_ASSISTANT
+    assert response["sender"] == MessageSender.ASSISTANT
     await communicator.disconnect()

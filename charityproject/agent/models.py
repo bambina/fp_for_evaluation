@@ -1,14 +1,10 @@
 from django.db import models
+from agent.constants import MessageSender
 
 
 class ChatMessage(models.Model):
-    SENDER_TYPES = (
-        ("user", "User"),
-        ("assistant", "Assistant"),
-    )
-
     session_id = models.CharField(max_length=50)
-    sender_type = models.CharField(max_length=10, choices=SENDER_TYPES)
+    sender_type = models.CharField(max_length=10, choices=MessageSender.CHOICES)
     content = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
 

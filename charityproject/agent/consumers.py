@@ -45,11 +45,14 @@ class ChatConsumer(AsyncWebsocketConsumer):
         logger.info(f"New connection established in room: {self.room_name}")
         # Send a welcome message to the user
         await self.send_message_to_group(
-            MESSAGE_TYPE_ASSISTANT, INITIAL_MSG, SENDER_ASSISTANT
+            MESSAGE_TYPE_ASSISTANT, INITIAL_MSG, MessageSender.ASSISTANT
         )
         # Save assistant message to Redis
         RedisChatHistoryService.save_message(
-            self.room_name, SENDER_ASSISTANT, INITIAL_MSG, timezone.now().isoformat()
+            self.room_name,
+            MessageSender.ASSISTANT,
+            INITIAL_MSG,
+            timezone.now().isoformat(),
         )
 
     async def disconnect(self, close_code):
@@ -73,7 +76,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
             if not sender or not message:
                 logger.error(ERR_MISSING_FIELDS)
                 await self.send_message_to_group(
-                    MESSAGE_TYPE_ERROR, ERR_MSG_MISSING_FIELDS, SENDER_ASSISTANT
+                    MESSAGE_TYPE_ERROR, ERR_MSG_MISSING_FIELDS, MessageSender.ASSISTANT
                 )
                 return
 
@@ -92,25 +95,25 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 await self.send_message_to_group(
                     MESSAGE_TYPE_ASSISTANT,
                     bot_message,
-                    SENDER_ASSISTANT,
+                    MessageSender.ASSISTANT,
                 )
                 # Save AI response to chat history
                 RedisChatHistoryService.save_message(
                     self.room_name,
-                    SENDER_ASSISTANT,
+                    MessageSender.ASSISTANT,
                     bot_message,
                     self.current_time,
                 )
-                await self.save_message_to_db(SENDER_ASSISTANT, bot_message)
+                await self.save_message_to_db(MessageSender.ASSISTANT, bot_message)
         except json.JSONDecodeError:
             logger.error(ERR_INVALID_JSON)
             await self.send_message_to_group(
-                MESSAGE_TYPE_ERROR, ERR_MSG_INVALID_JSON, SENDER_ASSISTANT
+                MESSAGE_TYPE_ERROR, ERR_MSG_INVALID_JSON, MessageSender.ASSISTANT
             )
         except Exception as e:
             logger.error(ERR_UNEXPECTED_LOG.format(error=str(e)))
             await self.send_message_to_group(
-                MESSAGE_TYPE_ERROR, ERR_MSG_UNEXPECTED, SENDER_ASSISTANT
+                MESSAGE_TYPE_ERROR, ERR_MSG_UNEXPECTED, MessageSender.ASSISTANT
             )
 
     async def send_message_to_group(

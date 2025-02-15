@@ -12,8 +12,20 @@ ERR_MSG_INVALID_JSON = (
     "Invalid JSON format. Please check the message format and try again."
 )
 UNAUTHORIZED_ACCESS_CODE = 4001
-SENDER_ASSISTANT = "assistant"
 MAX_CHILDREN_RESULTS = 3
+
+
+class MessageSender:
+    USER = "user"
+    ASSISTANT = "assistant"
+
+    CHOICES = (
+        (USER, "User"),
+        (ASSISTANT, "Assistant"),
+    )
+
+    __doc__ = "OpenAI API supported values are: 'assistant', 'user'"
+
 
 # OpenAI API - prompt templates
 # https://platform.openai.com/docs/models/models-overview
