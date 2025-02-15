@@ -46,3 +46,32 @@ def setup_milvus_faq_collection(milvus_client):
     # Cleanup
     if milvus_client.has_collection(collection_name=FAQ_COLLECTION_NAME):
         milvus_client.drop_collection(collection_name=FAQ_COLLECTION_NAME)
+
+
+@pytest.fixture
+def setup_milvus_child_collection(milvus_client):
+    """Setup and cleanup child collection for testing.
+
+    - Creates a new collection with child schema and index.
+    - Drops the collection after test completion.
+    """
+    # Setup
+    if milvus_client.has_collection(collection_name=CHILD_COLLECTION_NAME):
+        milvus_client.drop_collection(collection_name=CHILD_COLLECTION_NAME)
+
+    schema = create_child_schema()
+    milvus_client.create_collection(
+        collection_name=CHILD_COLLECTION_NAME, schema=schema
+    )
+
+    base_index_params = milvus_client.prepare_index_params()
+    index_params = create_child_index_params(base_index_params)
+    milvus_client.create_index(
+        collection_name=CHILD_COLLECTION_NAME, index_params=index_params, sync=True
+    )
+
+    yield milvus_client
+
+    # Cleanup
+    if milvus_client.has_collection(collection_name=CHILD_COLLECTION_NAME):
+        milvus_client.drop_collection(collection_name=CHILD_COLLECTION_NAME)
