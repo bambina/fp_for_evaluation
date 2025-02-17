@@ -55,24 +55,29 @@ class OpenAIClientService:
 
     @classmethod
     def compose_relevant_docs(cls, search_result):
-        seen_item = set()
-        docs = ""
-        for hits in search_result:
-            for hit in hits:
-                if hit["id"] not in seen_item:
-                    seen_item.add(hit["id"])
-                    faq_url = reverse("faq_detail", kwargs={"pk": hit["id"]})
-                    docs += RELEVANT_DOCS_FORMAT.format(
-                        id=hit["id"],
-                        question=hit["entity"]["question"],
-                        answer=hit["entity"]["answer"],
-                        link=faq_url,
-                    )
-                    # print(f"FAQ ID: {hit['id']}")
-                    # print(f"Distance: {hit['distance']}")
-                    # print(f"Question: {hit['entity']['question']}")
-                    # print(f"Answer: {hit['entity']['answer']}")
-        return SYSTEM_CONTENT_2 + docs
+        """Compose formatted content from search results, selecting most relevant FAQs."""
+        processed_faq_ids = set()
+        unique_faqs = []
+        formatted_content = ""
+        max_faqs = 5
+        # Collect unique FAQs from all search results
+        for result_group in search_result:
+            for faq in result_group:
+                if faq["id"] not in processed_faq_ids:
+                    processed_faq_ids.add(faq["id"])
+                    unique_faqs.append(faq)
+        # Sort FAQs by distance
+        sorted_faqs = sorted(unique_faqs, key=lambda x: x["distance"], reverse=True)
+        # Format top N FAQs with their details and URLs
+        for faq in sorted_faqs[:max_faqs]:
+            faq_url = reverse("faq_detail", kwargs={"pk": faq["id"]})
+            formatted_content += RELEVANT_DOCS_FORMAT.format(
+                id=faq["id"],
+                question=faq["entity"]["question"],
+                answer=faq["entity"]["answer"],
+                link=faq_url,
+            )
+        return SYSTEM_CONTENT_2 + formatted_content
 
     @classmethod
     def compose_child_introduction(cls, children_data, is_found):
@@ -95,7 +100,7 @@ class OpenAIClientService:
             if is_found
             else SYSTEM_CONTENT_4
         )
-        # print(f"System content: {system_content + a + profiles}")
+        print(f"System content: {system_content + profiles}")
         return system_content + profiles
 
     @classmethod

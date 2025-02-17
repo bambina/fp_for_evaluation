@@ -47,7 +47,7 @@ class OpenAIInteractionOrchestrator:
                 system_content = OpenAIClientService.compose_child_introduction(
                     children, found
                 )
-
+                log_user_test(f"Children: {children}\n")
                 # for child in children:
                 #     print(f"Child found: {child}")
 
@@ -143,6 +143,7 @@ class OpenAIInteractionOrchestrator:
             child_found (bool): True if children were found through search, False if a random selection was made.
         """
         print(f"\nArguments: {arguments}\n")
+        log_user_test(f"Arguments: {arguments}\n")
         child_found = True
 
         # Perform structured and semantic search
