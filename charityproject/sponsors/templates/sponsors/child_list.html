@@ -36,9 +36,12 @@
                             <a href="{% url 'sponsors:child_detail' child.pk %}"
                                class="text-decoration-none text-dark">
                                 <div class="card h-100">
-                                    <img src="{{ MEDIA_URL }}placeholder_child_drawing.jpg"
-                                         class="card-img-top"
-                                         alt="Child Image">
+                                    <div class="position-relative">
+                                        <img src="{{ MEDIA_URL }}placeholder_child_drawing.jpg"
+                                             class="card-img-top"
+                                             alt="Child Image">
+                                        <div class="photo-credit">Credit: DALL&middot;E</div>
+                                    </div>
                                     <div class="card-body">
                                         <h5 class="card-title">{{ child.name }}</h5>
                                         <p class="card-text">

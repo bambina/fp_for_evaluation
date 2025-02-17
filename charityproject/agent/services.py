@@ -90,8 +90,12 @@ class OpenAIClientService:
             )
             profiles_list.append(child_info)
         profiles = "\n---\n".join(profiles_list)
-        system_content = SYSTEM_CONTENT_3 if is_found else SYSTEM_CONTENT_4
-        # print(f"System content: {system_content + profiles}")
+        system_content = (
+            SYSTEM_CONTENT_3.format(num_children=len(profiles_list))
+            if is_found
+            else SYSTEM_CONTENT_4
+        )
+        # print(f"System content: {system_content + a + profiles}")
         return system_content + profiles
 
     @classmethod

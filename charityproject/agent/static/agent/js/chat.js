@@ -3,7 +3,7 @@
 // The following variables are passed from the Django template:
 const hostName = JSON.parse(document.getElementById("host-name").textContent);
 const roomName = JSON.parse(document.getElementById("room-name").textContent);
-const senderNameUser = JSON.parse(document.getElementById("sender-user-name").textContent);
+const senderNameUser = JSON.parse(document.getElementById("sender-name-user").textContent);
 // Check if the current page is loaded over HTTPS
 const wsProtocol = window.location.protocol === "https:" ? "wss://" : "ws://";
 // Construct WebSocket URL
