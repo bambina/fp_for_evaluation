@@ -73,9 +73,9 @@ class OpenAIInteractionOrchestrator:
         Build filters for fetching a child using structured data.
         """
         filters = {}
-        if arguments.get("gender"):
+        if arguments.get("gender") and arguments["country"].lower() != 'all':
             filters["gender__name__iexact"] = arguments["gender"]
-        if arguments.get("country"):
+        if arguments.get("country") and arguments["country"].lower() != 'all':
             filters["country__name__iexact"] = arguments["country"]
         if isinstance(arguments.get("min_age"), int):
             filters["age__gte"] = arguments["min_age"]

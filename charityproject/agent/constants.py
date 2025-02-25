@@ -68,7 +68,6 @@ Determine if the user's query requires using a specific function:
   - Only the following attributes can be used for search: country, gender, age, birthday, and profile keywords.
   - If a user specifies an unavailable child search condition (e.g., a physical attribute like eye color, such as "a child with blue eyes"), do NOT respond with a generic message. Instead, politely inform them that only the listed attributes can be used, and suggest adjusting their query.
   - Locations or regions (e.g., 'Africa' or 'Southeast Asia') are NOT supported as country search criteria. Inform the user that only country names can be used and suggest specifying a country instead.
-  - Do not use 'all' for the country parameter. If no specific country is provided, leave it blank.
 - Always refer to the previous conversation history to provide a coherent response. If the user asks about something mentioned earlier, try to respond based on the information already provided, whenever possible.
 
 Example responses to an unrelated query:
@@ -189,33 +188,33 @@ TOOLS = [
                 "properties": {
                     "gender": {
                         "type": "string",
-                        "description": "The preferred gender of the child. Options are 'female', 'male', or 'other'. Leave blank or omit this field if no preference.",
+                        "description": "The preferred gender of the child. Options are 'female', 'male', or 'other'. Omit this field if no preference.",
                     },
                     "min_age": {
                         "type": "integer",
-                        "description": "The minimum preferred age of the child. Leave blank if not specified.",
+                        "description": "The minimum preferred age of the child. Omit this field if no preference.",
                     },
                     "max_age": {
                         "type": "integer",
-                        "description": "The maximum preferred age of the child. Leave blank if not specified.",
+                        "description": "The maximum preferred age of the child. Omit this field if no preference.",
                     },
                     "country": {
                         "type": "string",
-                        "description": "A single COUNTRY name the child is from. Leave blank if unspecified.",
+                        "description": "A single COUNTRY name the child is from. Omit this field if no preference.",
                     },
                     "profile_description": {
                         "type": "string",
-                        "description": "Keywords or phrases for semantic search against the child's profile description. This can include interests, background, or other relevant details. Leave blank if not specified.",
+                        "description": "Keywords or phrases for semantic search against the child's profile description. This can include interests, background, or other relevant details. Omit this field if not specified.",
                     },
                     "birth_month": {
                         "type": "integer",
-                        "description": "The birth month of the child (1 for January, 2 for February, etc.). Leave blank if not specified.",
+                        "description": "The birth month of the child (1 for January, 2 for February, etc.). Omit this field if no preference.",
                         "minimum": 1,
                         "maximum": 12,
                     },
                     "birth_day": {
                         "type": "integer",
-                        "description": "The birth day of the child (1 to 31, depending on the month). Leave blank if not specified.",
+                        "description": "The birth day of the child (1 to 31, depending on the month). Omit this field if no preference.",
                         "minimum": 1,
                         "maximum": 31,
                     },
