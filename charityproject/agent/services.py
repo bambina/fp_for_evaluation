@@ -80,7 +80,9 @@ class OpenAIClientService:
         return SYSTEM_CONTENT_2 + formatted_content
 
     @classmethod
-    def compose_child_introduction(cls, children_data, is_found):
+    def compose_child_introduction(
+        cls, children_data, is_found, semantic_search_keyword
+    ):
         profiles_list = []
         for child in children_data:
             child_url = reverse("sponsors:child_detail", kwargs={"pk": child.id})
@@ -95,11 +97,17 @@ class OpenAIClientService:
             )
             profiles_list.append(child_info)
         profiles = "\n---\n".join(profiles_list)
-        system_content = (
-            SYSTEM_CONTENT_3.format(num_children=len(profiles_list))
-            if is_found
-            else SYSTEM_CONTENT_4
-        )
+        if is_found:
+            note = (
+                SEMANTIC_SEARCH_NOTE.format(keyword=semantic_search_keyword)
+                if semantic_search_keyword
+                else FILTERED_SEARCH_NOTE
+            )
+            system_content = SYSTEM_CONTENT_3.format(
+                num_children=len(profiles_list), note=note
+            )
+        else:
+            system_content = SYSTEM_CONTENT_4
         print(f"System content: {system_content + profiles}")
         return system_content + profiles
 

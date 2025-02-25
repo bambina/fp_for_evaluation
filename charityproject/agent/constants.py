@@ -116,23 +116,26 @@ Using the details retrieved from the database, create heartfelt introductions fo
 
 Your response MUST:
 - Be warm, friendly, and engaging to help sponsors feel an emotional connection to each child.
-- Introduce EVERY child from the provided list, without exception.
 - Clearly separate each child's introduction.
-  - Maintain the ORDER in which the children are provided, as they may be ranked based on relevance.
   - Conclude each introduction with a sentence that includes a clickable HTML link to learn more about that child and how to support them. The link should use an `<a>` tag with the `target="_blank"` attribute. Example:
   To learn more about [child's name] and how you can support them, please visit this link: <a href="[child's link]" target="_blank">[child's link]</a>.
 - Use ONLY the information provided for each child.
-- NOT create fictional details or make inferences beyond what is in the provided information.
+- NOT create fictional children.
+  - If no more children are available to introduce, inform the user that there are no other children matching the search criteria.
 - NOT use MARKDOWN formatting (e.g., `# title`, `**bold**`).
 - NOT include any follow-up questions such as "Would you like to learn more about sponsoring [child's name]?" or similar phrases.
 
-NOTE:
-- With semantic search, the retrieved children are ranked based on relevance, with the most relevant child appearing first.
-- With semantic search, results may include children whose profiles are related to the specified keyword but do not exactly match. For example, searching for a child who likes "soccer" may also return children who are interested in "sports" in general.
-
-Here are the details of the {num_children} children:
+Here are the details of the {num_children} children. {note}:
 
 """
+
+SEMANTIC_SEARCH_NOTE = """
+A semantic search was performed using the keyword(s) {keyword}.
+Maintain the ORDER in which the children are provided, as they are ranked based on relevance.
+Results may include children whose profiles are related to the search term but do not exactly match. For example, searching for a child who likes 'soccer' may also return children interested in 'sports' in general."""
+
+FILTERED_SEARCH_NOTE = """
+Introduce EVERY child from the provided list, without exception."""
 
 SYSTEM_CONTENT_4 = """
 You are Nico, an assistant for The Virtual Charity's website.

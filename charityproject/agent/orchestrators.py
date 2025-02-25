@@ -41,11 +41,11 @@ class OpenAIInteractionOrchestrator:
                 )
             # Search for a child in the Sponsor a Child program
             elif function_name == "fetch_children":
-                children, found = await OpenAIInteractionOrchestrator.fetch_children(
-                    arguments
+                children, found, semantic_search_keyword = (
+                    await OpenAIInteractionOrchestrator.fetch_children(arguments)
                 )
                 system_content = OpenAIClientService.compose_child_introduction(
-                    children, found
+                    children, found, semantic_search_keyword
                 )
                 log_user_test(f"Children: {children}\n")
                 # for child in children:
@@ -73,9 +73,9 @@ class OpenAIInteractionOrchestrator:
         Build filters for fetching a child using structured data.
         """
         filters = {}
-        if arguments.get("gender") and arguments["country"].lower() != 'all':
+        if arguments.get("gender") and arguments["country"].lower() != "all":
             filters["gender__name__iexact"] = arguments["gender"]
-        if arguments.get("country") and arguments["country"].lower() != 'all':
+        if arguments.get("country") and arguments["country"].lower() != "all":
             filters["country__name__iexact"] = arguments["country"]
         if isinstance(arguments.get("min_age"), int):
             filters["age__gte"] = arguments["min_age"]
@@ -113,16 +113,15 @@ class OpenAIInteractionOrchestrator:
         Fetch children in the Sponsor a Child program based on profile description.
         """
         child_ids = []
-        no_filter = True
+        query_keyword = ""
         if arguments.get("profile_description"):
-            no_filter = False
-            query = arguments["profile_description"]
-            query_vectors = USEModelService.get_vector_representation([query])
+            query_keyword = arguments["profile_description"]
+            query_vectors = USEModelService.get_vector_representation([query_keyword])
             result = MilvusClientService.search_child_profiles(query_vectors, 5)
             for hits in result:
                 for hit in hits:
                     child_ids.append(hit["entity"]["id"])
-        return child_ids, no_filter
+        return child_ids, query_keyword
 
     @staticmethod
     def merge_children_results(structured_match_ids, semantic_match_ids):
@@ -150,7 +149,7 @@ class OpenAIInteractionOrchestrator:
         structured_match_ids, is_structured_filter_missing = (
             await OpenAIInteractionOrchestrator.fetch_children_by_filters(arguments)
         )
-        semantic_match_ids, is_semantic_filter_missing = (
+        semantic_match_ids, semantic_search_keyword = (
             await OpenAIInteractionOrchestrator.fetch_children_by_profile_description(
                 arguments
             )
@@ -159,7 +158,7 @@ class OpenAIInteractionOrchestrator:
         # Determine child IDs based on search results
         if is_structured_filter_missing:
             child_ids = semantic_match_ids
-        elif is_semantic_filter_missing:
+        elif semantic_search_keyword == "":
             child_ids = structured_match_ids
         else:
             child_ids = OpenAIInteractionOrchestrator.merge_children_results(
@@ -184,7 +183,7 @@ class OpenAIInteractionOrchestrator:
             children = [await OpenAIInteractionOrchestrator.get_random_child()]
             # print(f"\nRandom child: {children}\n")
 
-        return children, child_found
+        return children, child_found, semantic_search_keyword
 
     @staticmethod
     async def get_random_child():
