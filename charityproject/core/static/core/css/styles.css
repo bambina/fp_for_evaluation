@@ -4,11 +4,9 @@
 }
 
 .hero-section {
-  background-image: url("https://www.savethechildren.org.uk/content/dam/global/images/countries/bolivia/CH1853157_boys_fun_in_bolivia_hero.jpg");
-  /* Use local image if the above image link is broken */
-  /* background-image: url('../images/top.jpg'); */
+  background-image: url('../images/top.jpg');
   background-size: cover;
-  background-position: left bottom;
+  background-position: center;
   background-repeat: no-repeat;
   color: white;
   width: 100%;

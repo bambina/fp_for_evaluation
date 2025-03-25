@@ -2,7 +2,7 @@
 {% load static %}
 {% load bootstrap_icons %}
 {% block content %}
-    <section class="hero-section py-5 mt-5">
+    <section class="hero-section py-5 mt-5 position-relative">
         <div class="container py-5 px-0">
             <div class="col-lg-7 col-md-8 pt-5">
                 <h1 class="fw-light text-shadow-lg">Together, we can light the way.</h1>
@@ -17,6 +17,8 @@
                 </p>
             </div>
         </div>
+        <!-- Photo credit overlay -->
+        <div class="photo-credit">Photo credit: Save the Children</div>
     </section>
     <section class="py-5 text-center">
         <div class="container">
@@ -39,8 +41,7 @@
                 <div class="col-md-4">
                     <div class="card">
                         <div class="position-relative">
-                            <!-- Use src="{% static 'core/images/mission.jpg' %}" if the image link is broken -->
-                            <img src="https://www.savethechildren.org.uk/content/dam/global/images/countries/somalia/fatima-ch1357581-orig.jpg"
+                            <img src="{% static 'core/images/mission.jpg' %}"
                                  class="card-img-top"
                                  alt="Our Mission">
                             <!-- Photo credit overlay -->
@@ -56,8 +57,7 @@
                 <div class="col-md-4">
                     <div class="card">
                         <div class="position-relative">
-                            <!-- Use src="{% static 'core/images/activities.jpg' %}" if the image link is broken -->
-                            <img src="https://www.savethechildren.org.uk/content/dam/gb/images/pp/tenneh--ch1575045-orig.jpg"
+                            <img src="{% static 'core/images/activities.jpg' %}"
                                  class="card-img-top"
                                  alt="What We Do">
                             <!-- Photo credit overlay -->
@@ -73,8 +73,7 @@
                 <div class="col-md-4">
                     <div class="card">
                         <div class="position-relative">
-                            <!-- Use src="{% static 'core/images/news.jpg' %}" if the image link is broken -->
-                            <img src="https://www.savethechildren.org.uk/content/dam/global/images/countries/madagascar/vanilla-madagascar-ch1306092-orig.jpg"
+                            <img src="{% static 'core/images/news.jpg' %}"
                                  class="card-img-top"
                                  alt="Latest News">
                             <!-- Photo credit overlay -->
