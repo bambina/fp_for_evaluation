@@ -6,6 +6,7 @@ This file contains fixtures that can be automatically used across all test files
 """
 
 import pytest
+from unittest.mock import MagicMock
 from pymilvus import MilvusClient
 
 from django.conf import settings
@@ -75,3 +76,32 @@ def setup_milvus_child_collection(milvus_client):
     # Cleanup
     if milvus_client.has_collection(collection_name=CHILD_COLLECTION_NAME):
         milvus_client.drop_collection(collection_name=CHILD_COLLECTION_NAME)
+
+
+@pytest.fixture
+def mock_chat_completion():
+    """Return a mock chat completion object."""
+    mocked_completion = MagicMock()
+    mocked_completion.choices = [
+        MagicMock(
+            finish_reason="stop",
+            message=MagicMock(
+                content="Hello! How can I assist you today?",
+            ),
+        )
+    ]
+    mocked_completion.model = "gpt-3.5-turbo-0125"
+    mocked_completion.usage = MagicMock(total_tokens=100)
+    return mocked_completion
+
+
+@pytest.fixture
+def mock_chat_history():
+    """Return a mock chat history."""
+    return [
+        {
+            "role": "assistant",
+            "content": "Hi, I'm Nico, your assistant for The Virtual Charity!",
+        },
+        {"role": "user", "content": "Hello, how are you?"},
+    ]

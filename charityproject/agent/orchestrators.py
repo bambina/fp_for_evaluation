@@ -57,15 +57,30 @@ class OpenAIInteractionOrchestrator:
                 )
             else:
                 return f"OpenAI model wants to call a function not defined: {function_name}"
+        elif finish_reason == "stop":
+            return {
+                "model": completion.model,
+                "total_tokens": completion.usage.total_tokens,
+                "content": completion.choices[0].message.content,
+            }
+        elif finish_reason == "length":
+            return {
+                "model": completion.model,
+                "total_tokens": completion.usage.total_tokens,
+                "content": "Sorry, the answer was too long to be completed in one response. Please rephrase your question or ask for a shorter answer.",
+            }
+        elif finish_reason == "content_filter":
+            return {
+                "model": completion.model,
+                "tatal_tokens": completion.usage.total_tokens,
+                "error": "The content of the response was filtered for safety reasons. Please modify your request or try again with a different wording.",
+            }
         else:
-            # print(f"\nFinish reason: {finish_reason}\n")
-            log_user_test(f"Finish reason: {finish_reason}\n")
-
-        return {
-            "model": completion.model,
-            "total_tokens": completion.usage.total_tokens,
-            "content": completion.choices[0].message.content,
-        }
+            return {
+                "model": completion.model,
+                "tatal_tokens": completion.usage.total_tokens,
+                "error": "unexpected error...???",
+            }
 
     @staticmethod
     def build_structured_child_filters(arguments):
@@ -176,12 +191,10 @@ class OpenAIInteractionOrchestrator:
             children = [
                 children_dict[id] for id in child_ids[:3] if id in children_dict
             ]
-            # print(f"\nChildren: {children}\n")
         else:
             # If no children were found, select a random child
             child_found = False
             children = [await OpenAIInteractionOrchestrator.get_random_child()]
-            # print(f"\nRandom child: {children}\n")
 
         return children, child_found, semantic_search_keyword
 

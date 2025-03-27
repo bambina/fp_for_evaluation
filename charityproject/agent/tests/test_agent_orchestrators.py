@@ -1,4 +1,5 @@
 import pytest
+from pytest_mock import mocker
 from agent.orchestrators import *
 
 from model_bakery import baker
@@ -174,3 +175,26 @@ class TestOpenAIInteractionOrchestrator:
         assert len(children) == 1
         assert child_found is False
         assert query_keyword == ""
+
+    @pytest.mark.asyncio
+    async def test_generate_response_when_finish_reason_is_stop(
+        self, mocker, mock_chat_completion, mock_chat_history
+    ):
+        """Test that generate_response returns a normal reply when the finish_reason is 'stop'"""
+        mocker.patch(
+            "agent.services.OpenAIClientService.chat_completion",
+            return_value=mock_chat_completion,
+        )
+        mocker.patch(
+            "agent.services.RedisChatHistoryService.get_chat_history",
+            return_value=mock_chat_history,
+        )
+        response = await OpenAIInteractionOrchestrator.generate_response(
+            "test_session_id"
+        )
+        expected = {
+            "model": "gpt-3.5-turbo-0125",
+            "total_tokens": 100,
+            "content": "Hello! How can I assist you today?",
+        }
+        assert response == expected

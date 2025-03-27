@@ -89,7 +89,6 @@ class ChatConsumer(AsyncWebsocketConsumer):
             response = await OpenAIInteractionOrchestrator.generate_response(
                 self.room_name
             )
-            # response = {"content": "Hello, how can I help you?"}
             # Process and save AI response
             if bot_message := response["content"]:
                 await self.send_message_to_group(
