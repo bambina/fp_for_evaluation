@@ -103,13 +103,15 @@ class TestOpenAIInteractionOrchestrator:
         self, mock_semantic_search, child_with_profile
     ):
         """Ensure fetch_children returns correct child when using semantic search."""
-        mock_semantic_search.return_value = [child_with_profile.id], False
-        arguments = {"profile_description": "loves playing football"}
-        children, child_found = await OpenAIInteractionOrchestrator.fetch_children(
-            arguments
+        description = "loves playing football"
+        mock_semantic_search.return_value = [child_with_profile.id], description
+        arguments = {"profile_description": description}
+        children, child_found, query_keyword = (
+            await OpenAIInteractionOrchestrator.fetch_children(arguments)
         )
         assert len(children) == 1
         assert child_found is True
+        assert query_keyword == description
         assert children[0].id == child_with_profile.id
 
     @pytest.mark.asyncio
@@ -120,13 +122,14 @@ class TestOpenAIInteractionOrchestrator:
         self, mock_semantic_search, child_with_structured_data
     ):
         """Ensure fetch_children returns correct child when using structured search."""
-        mock_semantic_search.return_value = [], True
+        mock_semantic_search.return_value = [], ""
         arguments = {"gender": "female", "country": "Bolivia"}
-        children, child_found = await OpenAIInteractionOrchestrator.fetch_children(
-            arguments
+        children, child_found, query_keyword = (
+            await OpenAIInteractionOrchestrator.fetch_children(arguments)
         )
         assert len(children) == 1
         assert child_found is True
+        assert query_keyword == ""
         assert children[0].id == child_with_structured_data.id
 
     @pytest.mark.asyncio
@@ -137,21 +140,23 @@ class TestOpenAIInteractionOrchestrator:
         self, mock_semantic_search, children_for_search_tests
     ):
         """Ensure fetch_children correctly merges results from both structured and semantic searches."""
+        description = "loves playing football"
         child1, child3 = (
             children_for_search_tests["child1"],
             children_for_search_tests["child3"],
         )
-        mock_semantic_search.return_value = [child1.id, child3.id], False
+        mock_semantic_search.return_value = [child1.id, child3.id], description
         arguments = {
             "gender": "male",
-            "profile_description": "loves playing football",
+            "profile_description": description,
         }
-        children, child_found = await OpenAIInteractionOrchestrator.fetch_children(
-            arguments
+        children, child_found, query_keyword = (
+            await OpenAIInteractionOrchestrator.fetch_children(arguments)
         )
         assert len(children) == 2
         assert children == [child1, child3]
         assert child_found is True
+        assert query_keyword == description
 
     @pytest.mark.asyncio
     @patch(
@@ -161,10 +166,11 @@ class TestOpenAIInteractionOrchestrator:
         self, mock_semantic_search, child_with_structured_data
     ):
         """Ensure fetch_children selects a random child when no search results are found."""
-        mock_semantic_search.return_value = [], True
+        mock_semantic_search.return_value = [], ""
         arguments = {"country": "Kenya"}
-        children, child_found = await OpenAIInteractionOrchestrator.fetch_children(
-            arguments
+        children, child_found, query_keyword = (
+            await OpenAIInteractionOrchestrator.fetch_children(arguments)
         )
         assert len(children) == 1
         assert child_found is False
+        assert query_keyword == ""
