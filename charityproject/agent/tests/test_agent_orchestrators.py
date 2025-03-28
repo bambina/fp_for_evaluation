@@ -9,7 +9,7 @@ from unittest.mock import patch
 
 
 @pytest.mark.django_db(transaction=True)
-class TestOpenAIInteractionOrchestrator:
+class TestChatOrchestrator:
     @pytest.fixture
     def child_with_profile(self):
         """Create a child with a profile description for semantic search testing."""
@@ -65,9 +65,7 @@ class TestOpenAIInteractionOrchestrator:
             "date_of_birth__day": 15,
         }
 
-        filters = OpenAIInteractionOrchestrator.build_structured_child_filters(
-            arguments
-        )
+        filters = ChatOrchestrator.build_structured_child_filters(arguments)
 
         assert filters == expected_filters
 
@@ -78,9 +76,7 @@ class TestOpenAIInteractionOrchestrator:
         arguments = {}
         expected_filters = {}
 
-        filters = OpenAIInteractionOrchestrator.build_structured_child_filters(
-            arguments
-        )
+        filters = ChatOrchestrator.build_structured_child_filters(arguments)
 
         assert filters == expected_filters
 
@@ -91,16 +87,12 @@ class TestOpenAIInteractionOrchestrator:
         arguments = {"gender": "male", "birth_day": 25}
         expected_filters = {"gender__name__iexact": "male", "date_of_birth__day": 25}
 
-        filters = OpenAIInteractionOrchestrator.build_structured_child_filters(
-            arguments
-        )
+        filters = ChatOrchestrator.build_structured_child_filters(arguments)
 
         assert filters == expected_filters
 
     @pytest.mark.asyncio
-    @patch(
-        "agent.orchestrators.OpenAIInteractionOrchestrator.semantic_search_for_children"
-    )
+    @patch("agent.orchestrators.ChatOrchestrator.semantic_search_for_children")
     async def test_fetch_children_with_semantic_search(
         self, mock_semantic_search, child_with_profile
     ):
@@ -108,8 +100,8 @@ class TestOpenAIInteractionOrchestrator:
         description = "loves playing football"
         mock_semantic_search.return_value = [child_with_profile.id], description
         arguments = {"profile_description": description}
-        children, child_found, query_keyword = (
-            await OpenAIInteractionOrchestrator.search_children(arguments)
+        children, child_found, query_keyword = await ChatOrchestrator.search_children(
+            arguments
         )
         assert len(children) == 1
         assert child_found is True
@@ -117,17 +109,15 @@ class TestOpenAIInteractionOrchestrator:
         assert children[0].id == child_with_profile.id
 
     @pytest.mark.asyncio
-    @patch(
-        "agent.orchestrators.OpenAIInteractionOrchestrator.semantic_search_for_children"
-    )
+    @patch("agent.orchestrators.ChatOrchestrator.semantic_search_for_children")
     async def test_fetch_children_with_structured_search(
         self, mock_semantic_search, child_with_structured_data
     ):
         """Ensure fetch_children returns correct child when using structured search."""
         mock_semantic_search.return_value = [], ""
         arguments = {"gender": "female", "country": "Bolivia"}
-        children, child_found, query_keyword = (
-            await OpenAIInteractionOrchestrator.search_children(arguments)
+        children, child_found, query_keyword = await ChatOrchestrator.search_children(
+            arguments
         )
         assert len(children) == 1
         assert child_found is True
@@ -135,9 +125,7 @@ class TestOpenAIInteractionOrchestrator:
         assert children[0].id == child_with_structured_data.id
 
     @pytest.mark.asyncio
-    @patch(
-        "agent.orchestrators.OpenAIInteractionOrchestrator.semantic_search_for_children"
-    )
+    @patch("agent.orchestrators.ChatOrchestrator.semantic_search_for_children")
     async def test_fetch_children_with_both_searches(
         self, mock_semantic_search, children_for_search_tests
     ):
@@ -152,8 +140,8 @@ class TestOpenAIInteractionOrchestrator:
             "gender": "male",
             "profile_description": description,
         }
-        children, child_found, query_keyword = (
-            await OpenAIInteractionOrchestrator.search_children(arguments)
+        children, child_found, query_keyword = await ChatOrchestrator.search_children(
+            arguments
         )
         assert len(children) == 2
         assert children == [child1, child3]
@@ -161,17 +149,15 @@ class TestOpenAIInteractionOrchestrator:
         assert query_keyword == description
 
     @pytest.mark.asyncio
-    @patch(
-        "agent.orchestrators.OpenAIInteractionOrchestrator.semantic_search_for_children"
-    )
+    @patch("agent.orchestrators.ChatOrchestrator.semantic_search_for_children")
     async def test_fetch_children_falls_back_to_random_selection(
         self, mock_semantic_search, child_with_structured_data
     ):
         """Ensure fetch_children selects a random child when no search results are found."""
         mock_semantic_search.return_value = [], ""
         arguments = {"country": "Kenya"}
-        children, child_found, query_keyword = (
-            await OpenAIInteractionOrchestrator.search_children(arguments)
+        children, child_found, query_keyword = await ChatOrchestrator.search_children(
+            arguments
         )
         assert len(children) == 1
         assert child_found is False
@@ -194,9 +180,7 @@ class TestOpenAIInteractionOrchestrator:
             "agent.services.RedisChatHistoryService.get_chat_history",
             return_value=mock_chat_history,
         )
-        response = await OpenAIInteractionOrchestrator.generate_response(
-            "test_session_id"
-        )
+        response = await ChatOrchestrator.generate_response("test_session_id")
         expected = {"model": "gpt-3.5-turbo", "total_tokens": 100, "content": content}
         assert response == expected
 
@@ -219,7 +203,7 @@ class TestOpenAIInteractionOrchestrator:
             return_value=mock_chat_history,
         )
         with pytest.raises(expected_exception):
-            await OpenAIInteractionOrchestrator.generate_response("test_session_id")
+            await ChatOrchestrator.generate_response("test_session_id")
 
     @pytest.mark.asyncio
     @pytest.mark.parametrize(

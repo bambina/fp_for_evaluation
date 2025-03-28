@@ -86,9 +86,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
             )
             await self.save_message_to_db(sender, message)
             # Generate response using OpenAI API
-            response = await OpenAIInteractionOrchestrator.generate_response(
-                self.room_name
-            )
+            response = await ChatOrchestrator.generate_response(self.room_name)
             # Process and save AI response
             bot_message = response["content"]
             await self.send_message_to_group(

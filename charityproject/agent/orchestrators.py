@@ -11,7 +11,7 @@ from semanticsearch.services import *
 from core.utils import *
 
 
-class OpenAIInteractionOrchestrator:
+class ChatOrchestrator:
 
     @staticmethod
     async def generate_response(room_name):
@@ -26,13 +26,13 @@ class OpenAIInteractionOrchestrator:
         finish_reason = completion.choices[0].finish_reason
         # Handle tool calls if requested by the model
         if finish_reason == FinishReason.TOOL_CALLS:
-            completion = await OpenAIInteractionOrchestrator.handle_tool_calls(
+            completion = await ChatOrchestrator.handle_tool_calls(
                 completion, chat_history
             )
-            return OpenAIInteractionOrchestrator.compose_response(completion)
+            return ChatOrchestrator.compose_response(completion)
         # Return the final response if the generation is complete
         elif finish_reason == FinishReason.STOP:
-            return OpenAIInteractionOrchestrator.compose_response(completion)
+            return ChatOrchestrator.compose_response(completion)
         # Handle errors based on finish reason
         elif finish_reason == FinishReason.LENGTH:
             raise ChatResponseTooLongError(OpenAIAPIErrorMessages.RESPONSE_TOO_LONG)
@@ -54,13 +54,9 @@ class OpenAIInteractionOrchestrator:
         function_name = tool_function.name
         arguments = ast.literal_eval(tool_function.arguments)
         if function_name == "search_relevant_faqs":
-            return OpenAIInteractionOrchestrator.search_relevant_faqs(
-                arguments, chat_history
-            )
+            return ChatOrchestrator.search_relevant_faqs(arguments, chat_history)
         elif function_name == "fetch_children":
-            return await OpenAIInteractionOrchestrator.fetch_children(
-                arguments, chat_history
-            )
+            return await ChatOrchestrator.fetch_children(arguments, chat_history)
         else:
             raise ChatUndefinedToolCallError(
                 OpenAIAPIErrorMessages.UNDEFINED_TOOL_CALL.format(
@@ -93,7 +89,7 @@ class OpenAIInteractionOrchestrator:
         a follow-up completion with a formatted introduction.
         """
         children, found, semantic_search_keyword = (
-            await OpenAIInteractionOrchestrator.search_children(arguments)
+            await ChatOrchestrator.search_children(arguments)
         )
         system_content = OpenAIClientService.compose_child_introduction(
             children, found, semantic_search_keyword
@@ -143,9 +139,7 @@ class OpenAIInteractionOrchestrator:
             is_filter_missing (bool): True if no filters were provided.
         """
         # Build filters for structured child search
-        filters = OpenAIInteractionOrchestrator.build_structured_child_filters(
-            arguments
-        )
+        filters = ChatOrchestrator.build_structured_child_filters(arguments)
 
         # Return empty result if no filters are provided
         if not filters:
@@ -204,12 +198,10 @@ class OpenAIInteractionOrchestrator:
         """
         # Perform structured and semantic search
         structured_match_ids, is_filter_missing = (
-            await OpenAIInteractionOrchestrator.structured_search_for_children(
-                arguments
-            )
+            await ChatOrchestrator.structured_search_for_children(arguments)
         )
         semantic_match_ids, semantic_keyword = (
-            await OpenAIInteractionOrchestrator.semantic_search_for_children(arguments)
+            await ChatOrchestrator.semantic_search_for_children(arguments)
         )
         # Determine which IDs to use based on the available search results
         if is_filter_missing:
@@ -217,16 +209,14 @@ class OpenAIInteractionOrchestrator:
         elif not semantic_keyword:
             child_ids = structured_match_ids
         else:
-            child_ids = OpenAIInteractionOrchestrator.intersect_children_ids(
+            child_ids = ChatOrchestrator.intersect_children_ids(
                 structured_match_ids, semantic_match_ids
             )
         # Retrieve children by IDs or fall back to a random child
         if child_ids:
-            children = await OpenAIInteractionOrchestrator.get_children_by_ids(
-                child_ids
-            )
+            children = await ChatOrchestrator.get_children_by_ids(child_ids)
         else:
-            children = [await OpenAIInteractionOrchestrator.get_random_child()]
+            children = [await ChatOrchestrator.get_random_child()]
         return children, bool(child_ids), semantic_keyword
 
     @staticmethod
