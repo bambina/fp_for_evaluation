@@ -99,7 +99,7 @@ class TestOpenAIInteractionOrchestrator:
 
     @pytest.mark.asyncio
     @patch(
-        "agent.orchestrators.OpenAIInteractionOrchestrator.fetch_children_by_profile_description"
+        "agent.orchestrators.OpenAIInteractionOrchestrator.semantic_search_for_children"
     )
     async def test_fetch_children_with_semantic_search(
         self, mock_semantic_search, child_with_profile
@@ -109,9 +109,7 @@ class TestOpenAIInteractionOrchestrator:
         mock_semantic_search.return_value = [child_with_profile.id], description
         arguments = {"profile_description": description}
         children, child_found, query_keyword = (
-            await OpenAIInteractionOrchestrator.retrieve_children_by_attributes(
-                arguments
-            )
+            await OpenAIInteractionOrchestrator.search_children(arguments)
         )
         assert len(children) == 1
         assert child_found is True
@@ -120,7 +118,7 @@ class TestOpenAIInteractionOrchestrator:
 
     @pytest.mark.asyncio
     @patch(
-        "agent.orchestrators.OpenAIInteractionOrchestrator.fetch_children_by_profile_description"
+        "agent.orchestrators.OpenAIInteractionOrchestrator.semantic_search_for_children"
     )
     async def test_fetch_children_with_structured_search(
         self, mock_semantic_search, child_with_structured_data
@@ -129,9 +127,7 @@ class TestOpenAIInteractionOrchestrator:
         mock_semantic_search.return_value = [], ""
         arguments = {"gender": "female", "country": "Bolivia"}
         children, child_found, query_keyword = (
-            await OpenAIInteractionOrchestrator.retrieve_children_by_attributes(
-                arguments
-            )
+            await OpenAIInteractionOrchestrator.search_children(arguments)
         )
         assert len(children) == 1
         assert child_found is True
@@ -140,7 +136,7 @@ class TestOpenAIInteractionOrchestrator:
 
     @pytest.mark.asyncio
     @patch(
-        "agent.orchestrators.OpenAIInteractionOrchestrator.fetch_children_by_profile_description"
+        "agent.orchestrators.OpenAIInteractionOrchestrator.semantic_search_for_children"
     )
     async def test_fetch_children_with_both_searches(
         self, mock_semantic_search, children_for_search_tests
@@ -157,9 +153,7 @@ class TestOpenAIInteractionOrchestrator:
             "profile_description": description,
         }
         children, child_found, query_keyword = (
-            await OpenAIInteractionOrchestrator.retrieve_children_by_attributes(
-                arguments
-            )
+            await OpenAIInteractionOrchestrator.search_children(arguments)
         )
         assert len(children) == 2
         assert children == [child1, child3]
@@ -168,7 +162,7 @@ class TestOpenAIInteractionOrchestrator:
 
     @pytest.mark.asyncio
     @patch(
-        "agent.orchestrators.OpenAIInteractionOrchestrator.fetch_children_by_profile_description"
+        "agent.orchestrators.OpenAIInteractionOrchestrator.semantic_search_for_children"
     )
     async def test_fetch_children_falls_back_to_random_selection(
         self, mock_semantic_search, child_with_structured_data
@@ -177,9 +171,7 @@ class TestOpenAIInteractionOrchestrator:
         mock_semantic_search.return_value = [], ""
         arguments = {"country": "Kenya"}
         children, child_found, query_keyword = (
-            await OpenAIInteractionOrchestrator.retrieve_children_by_attributes(
-                arguments
-            )
+            await OpenAIInteractionOrchestrator.search_children(arguments)
         )
         assert len(children) == 1
         assert child_found is False

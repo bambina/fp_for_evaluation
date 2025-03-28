@@ -93,9 +93,7 @@ class OpenAIInteractionOrchestrator:
         a follow-up completion with a formatted introduction.
         """
         children, found, semantic_search_keyword = (
-            await OpenAIInteractionOrchestrator.retrieve_children_by_attributes(
-                arguments
-            )
+            await OpenAIInteractionOrchestrator.search_children(arguments)
         )
         system_content = OpenAIClientService.compose_child_introduction(
             children, found, semantic_search_keyword
@@ -136,99 +134,117 @@ class OpenAIInteractionOrchestrator:
         return filters
 
     @staticmethod
-    async def fetch_children_by_filters(arguments):
+    async def structured_search_for_children(arguments):
         """
-        Fetch children in the Sponsor a Child program based on structured attributes.
+        Performs a structured search for children based on filterable attributes.
+
+        Returns:
+            child_ids (List[int]): List of matching child IDs.
+            is_filter_missing (bool): True if no filters were provided.
         """
-        # Build filters for fetching children
+        # Build filters for structured child search
         filters = OpenAIInteractionOrchestrator.build_structured_child_filters(
             arguments
         )
 
-        # Fetch children based on attributes
+        # Return empty result if no filters are provided
         if not filters:
             return [], True
-        return [
+
+        # Query children matching the filter conditions
+        child_ids = [
             child.id
-            async for child in Child.objects.filter(**filters)
-            .select_related("country", "gender")
-            .all()
-        ], False
+            async for child in Child.objects.filter(**filters).select_related(
+                "country", "gender"
+            )
+        ]
+
+        return child_ids, False
 
     @staticmethod
-    async def fetch_children_by_profile_description(arguments):
+    async def semantic_search_for_children(arguments):
         """
-        Fetch children in the Sponsor a Child program based on profile description.
+        Performs a semantic search for children based on profile description.
+
+        Returns:
+            child_ids (List[int]): List of matching child IDs.
+            query_keyword (str): The keyword used for semantic search.
         """
         child_ids = []
         query_keyword = ""
+        # Perform semantic search if profile description is provided
         if arguments.get("profile_description"):
             query_keyword = arguments["profile_description"]
             query_vectors = USEModelService.get_vector_representation([query_keyword])
-            result = MilvusClientService.search_child_profiles(query_vectors, 5)
+            result = MilvusClientService.search_child_profiles(query_vectors)
             for hits in result:
                 for hit in hits:
                     child_ids.append(hit["entity"]["id"])
         return child_ids, query_keyword
 
     @staticmethod
-    def merge_children_results(structured_match_ids, semantic_match_ids):
+    def intersect_children_ids(structured_match_ids, semantic_match_ids):
         """
-        Merge results while preserving the ranking of semantic search.
-        Returns IDs that appear in both structured and semantic search.
+        Returns IDs that appear in both structured and semantic search results,
+        preserving the original order of semantic search.
         """
         structured_set = set(structured_match_ids)
         return [id for id in semantic_match_ids if id in structured_set]
 
     @staticmethod
-    async def retrieve_children_by_attributes(arguments):
+    async def search_children(arguments: dict) -> tuple[list, bool, str]:
         """
-        Fetch children in the Sponsor a Child program based on the given attributes.
+        Searches for children based on structured and semantic criteria.
+        Falls back to a random child if no match is found.
 
         Returns:
             children (List[Child]): A list of children found through search or random selection.
-            child_found (bool): True if children were found through search, False if a random selection was made.
+            child_found (bool): True if children were found through search; False if fallback was used.
+            semantic_keyword (str): The keyword used for semantic search (empty if not used).
         """
-        log_user_test(f"Arguments: {arguments}\n")
-        child_found = True
-
         # Perform structured and semantic search
-        structured_match_ids, is_structured_filter_missing = (
-            await OpenAIInteractionOrchestrator.fetch_children_by_filters(arguments)
-        )
-        semantic_match_ids, semantic_search_keyword = (
-            await OpenAIInteractionOrchestrator.fetch_children_by_profile_description(
+        structured_match_ids, is_filter_missing = (
+            await OpenAIInteractionOrchestrator.structured_search_for_children(
                 arguments
             )
         )
-
-        # Determine child IDs based on search results
-        if is_structured_filter_missing:
+        semantic_match_ids, semantic_keyword = (
+            await OpenAIInteractionOrchestrator.semantic_search_for_children(arguments)
+        )
+        # Determine which IDs to use based on the available search results
+        if is_filter_missing:
             child_ids = semantic_match_ids
-        elif semantic_search_keyword == "":
+        elif not semantic_keyword:
             child_ids = structured_match_ids
         else:
-            child_ids = OpenAIInteractionOrchestrator.merge_children_results(
+            child_ids = OpenAIInteractionOrchestrator.intersect_children_ids(
                 structured_match_ids, semantic_match_ids
             )
-
-        # Retrieve children based on the determined IDs
+        # Retrieve children by IDs or fall back to a random child
         if child_ids:
-            children_dict = {
-                child.id: child
-                async for child in Child.objects.filter(
-                    id__in=child_ids[:3]
-                ).select_related("country", "gender")
-            }
-            children = [
-                children_dict[id] for id in child_ids[:3] if id in children_dict
-            ]
+            children = await OpenAIInteractionOrchestrator.get_children_by_ids(
+                child_ids
+            )
         else:
-            # If no children were found, select a random child
-            child_found = False
             children = [await OpenAIInteractionOrchestrator.get_random_child()]
+        return children, bool(child_ids), semantic_keyword
 
-        return children, child_found, semantic_search_keyword
+    @staticmethod
+    async def get_children_by_ids(child_ids: list[int], limit: int = 3) -> list:
+        """
+        Retrieves Child objects by ID, preserving the order of the input list.
+
+        Returns:
+            list[Child]: Child objects in the same order as the provided IDs.
+        """
+        child_ids = child_ids[:limit]
+        children_dict = {
+            child.id: child
+            async for child in Child.objects.filter(id__in=child_ids).select_related(
+                "country", "gender"
+            )
+        }
+        return [children_dict[id] for id in child_ids if id in children_dict]
 
     @staticmethod
     async def get_random_child():

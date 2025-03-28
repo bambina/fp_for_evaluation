@@ -77,7 +77,7 @@ class MilvusClientService:
         )
 
     @classmethod
-    def search_child_profiles(cls, query_vectors: np.ndarray, top_k: int = 3):
+    def search_child_profiles(cls, query_vectors: np.ndarray, top_k: int = 5):
         if cls._client is None:
             cls.init_client()
 
