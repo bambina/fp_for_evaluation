@@ -1,20 +1,20 @@
 import ast, random
+from typing import Optional
 
-from openai import NOT_GIVEN
-
-from sponsors.models import Child
+from openai import NOT_GIVEN, ChatCompletion
 
 from agent.constants import *
 from agent.services import *
 from agent.exceptions import *
-from semanticsearch.services import *
 from core.utils import *
+from semanticsearch.services import *
+from sponsors.models import Child
 
 
 class ChatOrchestrator:
 
     @staticmethod
-    async def generate_response(room_name):
+    async def generate_response(room_name) -> dict:
         """
         Generates a response based on the chat history and model's output.
         """
@@ -46,7 +46,9 @@ class ChatOrchestrator:
             )
 
     @staticmethod
-    async def handle_tool_calls(completion, chat_history):
+    async def handle_tool_calls(
+        completion: ChatCompletion, chat_history: list
+    ) -> ChatCompletion:
         """
         Processes tool call requests and dispatches them to the appropriate handler.
         """
@@ -65,7 +67,7 @@ class ChatOrchestrator:
             )
 
     @staticmethod
-    def search_relevant_faqs(arguments, chat_history):
+    def search_relevant_faqs(arguments: dict, chat_history: list) -> ChatCompletion:
         """
         Handles the 'search_relevant_faqs' tool call.
 
@@ -81,7 +83,7 @@ class ChatOrchestrator:
         )
 
     @staticmethod
-    async def fetch_children(arguments, chat_history):
+    async def fetch_children(arguments: dict, chat_history) -> ChatCompletion:
         """
         Handles the 'fetch_children' tool call.
 
@@ -99,7 +101,7 @@ class ChatOrchestrator:
         )
 
     @staticmethod
-    def compose_response(completion):
+    def compose_response(completion: ChatCompletion) -> dict:
         """
         Compose a response dictionary from the OpenAI completion object.
         """
@@ -110,7 +112,7 @@ class ChatOrchestrator:
         }
 
     @staticmethod
-    def build_structured_child_filters(arguments):
+    def build_structured_child_filters(arguments: dict) -> dict:
         """
         Build filters for fetching a child using structured data.
         """
@@ -130,7 +132,7 @@ class ChatOrchestrator:
         return filters
 
     @staticmethod
-    async def structured_search_for_children(arguments):
+    async def structured_search_for_children(arguments: dict) -> tuple[list[int], bool]:
         """
         Performs a structured search for children based on filterable attributes.
 
@@ -156,7 +158,7 @@ class ChatOrchestrator:
         return child_ids, False
 
     @staticmethod
-    async def semantic_search_for_children(arguments):
+    async def semantic_search_for_children(arguments: dict) -> tuple[list[int], str]:
         """
         Performs a semantic search for children based on profile description.
 
@@ -177,7 +179,9 @@ class ChatOrchestrator:
         return child_ids, query_keyword
 
     @staticmethod
-    def intersect_children_ids(structured_match_ids, semantic_match_ids):
+    def intersect_children_ids(
+        structured_match_ids: list[int], semantic_match_ids: list[int]
+    ) -> list[int]:
         """
         Returns IDs that appear in both structured and semantic search results,
         preserving the original order of semantic search.
@@ -237,7 +241,7 @@ class ChatOrchestrator:
         return [children_dict[id] for id in child_ids if id in children_dict]
 
     @staticmethod
-    async def get_random_child():
+    async def get_random_child() -> Optional[Child]:
         """
         Retrieve a random child from the database.
         """
