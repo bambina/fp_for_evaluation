@@ -109,7 +109,9 @@ class TestOpenAIInteractionOrchestrator:
         mock_semantic_search.return_value = [child_with_profile.id], description
         arguments = {"profile_description": description}
         children, child_found, query_keyword = (
-            await OpenAIInteractionOrchestrator.fetch_children(arguments)
+            await OpenAIInteractionOrchestrator.retrieve_children_by_attributes(
+                arguments
+            )
         )
         assert len(children) == 1
         assert child_found is True
@@ -127,7 +129,9 @@ class TestOpenAIInteractionOrchestrator:
         mock_semantic_search.return_value = [], ""
         arguments = {"gender": "female", "country": "Bolivia"}
         children, child_found, query_keyword = (
-            await OpenAIInteractionOrchestrator.fetch_children(arguments)
+            await OpenAIInteractionOrchestrator.retrieve_children_by_attributes(
+                arguments
+            )
         )
         assert len(children) == 1
         assert child_found is True
@@ -153,7 +157,9 @@ class TestOpenAIInteractionOrchestrator:
             "profile_description": description,
         }
         children, child_found, query_keyword = (
-            await OpenAIInteractionOrchestrator.fetch_children(arguments)
+            await OpenAIInteractionOrchestrator.retrieve_children_by_attributes(
+                arguments
+            )
         )
         assert len(children) == 2
         assert children == [child1, child3]
@@ -171,7 +177,9 @@ class TestOpenAIInteractionOrchestrator:
         mock_semantic_search.return_value = [], ""
         arguments = {"country": "Kenya"}
         children, child_found, query_keyword = (
-            await OpenAIInteractionOrchestrator.fetch_children(arguments)
+            await OpenAIInteractionOrchestrator.retrieve_children_by_attributes(
+                arguments
+            )
         )
         assert len(children) == 1
         assert child_found is False
