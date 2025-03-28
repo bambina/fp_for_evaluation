@@ -27,10 +27,37 @@ class MessageSender:
     __doc__ = "OpenAI API supported values are: 'assistant', 'user'"
 
 
-# OpenAI API - prompt templates
-# https://platform.openai.com/docs/models/models-overview
+# OpenAI API model names
 SELECTED_MODEL = "gpt-3.5-turbo"
 AVAILABLE_MODELS = ["gpt-4o", "gpt-4o-mini", "gpt-4-turbo", "gpt-3.5-turbo"]
+
+
+class FinishReason:
+    """Finish reasons for OpenAI API responses."""
+
+    STOP = "stop"
+    LENGTH = "length"
+    CONTENT_FILTER = "content_filter"
+    TOOL_CALLS = "tool_calls"
+
+
+class OpenAIAPIErrorMessages:
+    """Error messages for OpenAI API responses."""
+
+    RESPONSE_TOO_LONG = (
+        "The answer was too long to complete in one response. "
+        "Please rephrase your question or ask for a shorter answer."
+    )
+    CONTENT_FILTERED = (
+        "The content of the response was filtered for safety reasons. "
+        "Please modify your request or try again with a different wording."
+    )
+    UNDEFINED_TOOL_CALL = (
+        "OpenAI model wants to call a function not defined: {function_name}"
+    )
+    UNKNOWN_FINISH_REASON = "Unexpected finish_reason: {finish_reason}"
+
+
 RELEVANT_DOCS_FORMAT = (
     "FAQ ID:{id}\nQuestion:{question}\nAnswer:{answer}\nLink:{link}\n\n"
 )

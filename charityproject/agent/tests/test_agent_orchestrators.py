@@ -1,7 +1,8 @@
 import pytest
 from pytest_mock import mocker
 from agent.orchestrators import *
-
+from agent.constants import *
+from conftest import *
 from model_bakery import baker
 from sponsors.models import *
 from unittest.mock import patch
@@ -178,12 +179,16 @@ class TestOpenAIInteractionOrchestrator:
 
     @pytest.mark.asyncio
     async def test_generate_response_when_finish_reason_is_stop(
-        self, mocker, mock_chat_completion, mock_chat_history
+        self, mocker, mock_chat_history
     ):
         """Test that generate_response returns a normal reply when the finish_reason is 'stop'"""
+        content = "Hello! How can I assist you today?"
+        mock_completion = make_mock_chat_completion(
+            finish_reason=FinishReason.STOP, content=content
+        )
         mocker.patch(
             "agent.services.OpenAIClientService.chat_completion",
-            return_value=mock_chat_completion,
+            return_value=mock_completion,
         )
         mocker.patch(
             "agent.services.RedisChatHistoryService.get_chat_history",
@@ -192,9 +197,43 @@ class TestOpenAIInteractionOrchestrator:
         response = await OpenAIInteractionOrchestrator.generate_response(
             "test_session_id"
         )
-        expected = {
-            "model": "gpt-3.5-turbo-0125",
-            "total_tokens": 100,
-            "content": "Hello! How can I assist you today?",
-        }
+        expected = {"model": "gpt-3.5-turbo", "total_tokens": 100, "content": content}
         assert response == expected
+
+    @pytest.mark.asyncio
+    async def run_generate_response_error_test(
+        self,
+        mocker,
+        mock_chat_history,
+        finish_reason: str,
+        expected_exception: type[Exception],
+    ):
+        """Helper to test that generate_response raises the correct exception for a given finish_reason."""
+        mock_completion = make_mock_chat_completion(finish_reason=finish_reason)
+        mocker.patch(
+            "agent.services.OpenAIClientService.chat_completion",
+            return_value=mock_completion,
+        )
+        mocker.patch(
+            "agent.services.RedisChatHistoryService.get_chat_history",
+            return_value=mock_chat_history,
+        )
+        with pytest.raises(expected_exception):
+            await OpenAIInteractionOrchestrator.generate_response("test_session_id")
+
+    @pytest.mark.asyncio
+    @pytest.mark.parametrize(
+        "finish_reason,expected_exception",
+        [
+            (FinishReason.LENGTH, ChatResponseTooLongError),
+            (FinishReason.CONTENT_FILTER, ChatContentFilteredError),
+            ("unknown", ChatUnknownFinishReasonError),
+            (FinishReason.TOOL_CALLS, ChatUndefinedToolCallError),
+        ],
+    )
+    async def test_generate_response_error_cases(
+        self, mocker, mock_chat_history, finish_reason, expected_exception
+    ):
+        await self.run_generate_response_error_test(
+            mocker, mock_chat_history, finish_reason, expected_exception
+        )

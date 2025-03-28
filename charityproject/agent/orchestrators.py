@@ -6,6 +6,7 @@ from sponsors.models import Child
 
 from agent.constants import *
 from agent.services import *
+from agent.exceptions import *
 from semanticsearch.services import *
 from core.utils import *
 
@@ -21,7 +22,7 @@ class OpenAIInteractionOrchestrator:
         )
         finish_reason = completion.choices[0].finish_reason
         # Check if the model intends to call an application function
-        if finish_reason == "tool_calls":
+        if finish_reason == FinishReason.TOOL_CALLS:
             tool_function = completion.choices[0].message.tool_calls[0].function
             function_name = tool_function.name
             arguments = ast.literal_eval(tool_function.arguments)
@@ -48,39 +49,33 @@ class OpenAIInteractionOrchestrator:
                     children, found, semantic_search_keyword
                 )
                 log_user_test(f"Children: {children}\n")
-                # for child in children:
-                #     print(f"Child found: {child}")
 
                 # Use ChatGPT to format the search result
                 completion = OpenAIClientService.chat_completion(
                     SELECTED_MODEL, system_content, chat_history, NOT_GIVEN
                 )
             else:
-                return f"OpenAI model wants to call a function not defined: {function_name}"
-        elif finish_reason == "stop":
+                raise ChatUndefinedToolCallError(
+                    OpenAIAPIErrorMessages.UNDEFINED_TOOL_CALL.format(
+                        function_name=function_name
+                    )
+                )
+        elif finish_reason == FinishReason.STOP:
             return {
                 "model": completion.model,
                 "total_tokens": completion.usage.total_tokens,
                 "content": completion.choices[0].message.content,
             }
-        elif finish_reason == "length":
-            return {
-                "model": completion.model,
-                "total_tokens": completion.usage.total_tokens,
-                "content": "Sorry, the answer was too long to be completed in one response. Please rephrase your question or ask for a shorter answer.",
-            }
-        elif finish_reason == "content_filter":
-            return {
-                "model": completion.model,
-                "tatal_tokens": completion.usage.total_tokens,
-                "error": "The content of the response was filtered for safety reasons. Please modify your request or try again with a different wording.",
-            }
+        elif finish_reason == FinishReason.LENGTH:
+            raise ChatResponseTooLongError(OpenAIAPIErrorMessages.RESPONSE_TOO_LONG)
+        elif finish_reason == FinishReason.CONTENT_FILTER:
+            raise ChatContentFilteredError(OpenAIAPIErrorMessages.CONTENT_FILTERED)
         else:
-            return {
-                "model": completion.model,
-                "tatal_tokens": completion.usage.total_tokens,
-                "error": "unexpected error...???",
-            }
+            raise ChatUnknownFinishReasonError(
+                OpenAIAPIErrorMessages.UNKNOWN_FINISH_REASON.format(
+                    finish_reason=finish_reason
+                )
+            )
 
     @staticmethod
     def build_structured_child_filters(arguments):

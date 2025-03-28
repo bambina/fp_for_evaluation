@@ -1,11 +1,10 @@
 """
 Common test fixtures for the project.
-This file contains fixtures that can be automatically used across all test files:
-- Milvus client setup
-- Collection creation and cleanup
 """
 
 import pytest
+import json
+from typing import Optional
 from unittest.mock import MagicMock
 from pymilvus import MilvusClient
 
@@ -78,20 +77,29 @@ def setup_milvus_child_collection(milvus_client):
         milvus_client.drop_collection(collection_name=CHILD_COLLECTION_NAME)
 
 
-@pytest.fixture
-def mock_chat_completion():
-    """Return a mock chat completion object."""
+def make_mock_chat_completion(
+    finish_reason: str,
+    content: str = "",
+    function_name: Optional[str] = None,
+    model: str = "gpt-3.5-turbo",
+    total_tokens: int = 100,
+):
+    """Return a mock chat completion object with the given finish_reason and content."""
+    function_mock = MagicMock()
+    function_mock.name = function_name
+    function_mock.arguments = json.dumps({})
+    mocked_tool_call = MagicMock()
+    mocked_tool_call.function = function_mock
+
     mocked_completion = MagicMock()
     mocked_completion.choices = [
         MagicMock(
-            finish_reason="stop",
-            message=MagicMock(
-                content="Hello! How can I assist you today?",
-            ),
+            finish_reason=finish_reason,
+            message=MagicMock(content=content, tool_calls=[mocked_tool_call]),
         )
     ]
-    mocked_completion.model = "gpt-3.5-turbo-0125"
-    mocked_completion.usage = MagicMock(total_tokens=100)
+    mocked_completion.model = model
+    mocked_completion.usage = MagicMock(total_tokens=total_tokens)
     return mocked_completion
 
 

@@ -6,6 +6,7 @@ from unittest.mock import patch
 from django.urls import path
 
 from agent.consumers import *
+from conftest import *
 
 
 async def setup_communicator(room_name: str) -> WebsocketCommunicator:
@@ -39,11 +40,12 @@ async def test_receive_welcome_message():
 
 @pytest.mark.django_db(transaction=True)
 @pytest.mark.asyncio
-async def test_send_receive_message(mock_chat_completion):
+async def test_send_receive_message():
     """Test sending and receiving a message."""
+    mock_completion = make_mock_chat_completion(finish_reason=FinishReason.STOP)
     with patch(
         "agent.services.OpenAIClientService.chat_completion",
-        return_value=mock_chat_completion,
+        return_value=mock_completion,
     ) as mocked_chat_completion:
         session_id = generate_session_id()
         communicator = await setup_communicator(session_id)
@@ -52,7 +54,7 @@ async def test_send_receive_message(mock_chat_completion):
         await communicator.send_json_to({"message": "hello", "sender": "user"})
         response = await communicator.receive_json_from()
         assert response["type"] == MESSAGE_TYPE_ASSISTANT
-        assert response["message"] == mock_chat_completion.choices[0].message.content
+        assert response["message"] == mock_completion.choices[0].message.content
         await communicator.disconnect()
 
 

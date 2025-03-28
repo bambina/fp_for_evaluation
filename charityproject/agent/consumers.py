@@ -90,24 +90,28 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 self.room_name
             )
             # Process and save AI response
-            if bot_message := response["content"]:
-                await self.send_message_to_group(
-                    MESSAGE_TYPE_ASSISTANT,
-                    bot_message,
-                    MessageSender.ASSISTANT,
-                )
-                # Save AI response to chat history
-                RedisChatHistoryService.save_message(
-                    self.room_name,
-                    MessageSender.ASSISTANT,
-                    bot_message,
-                    self.current_time,
-                )
-                await self.save_message_to_db(MessageSender.ASSISTANT, bot_message)
+            bot_message = response["content"]
+            await self.send_message_to_group(
+                MESSAGE_TYPE_ASSISTANT,
+                bot_message,
+                MessageSender.ASSISTANT,
+            )
+            # Save AI response to chat history
+            RedisChatHistoryService.save_message(
+                self.room_name,
+                MessageSender.ASSISTANT,
+                bot_message,
+                self.current_time,
+            )
+            await self.save_message_to_db(MessageSender.ASSISTANT, bot_message)
         except json.JSONDecodeError:
             logger.error(ERR_INVALID_JSON)
             await self.send_message_to_group(
                 MESSAGE_TYPE_ERROR, ERR_MSG_INVALID_JSON, MessageSender.ASSISTANT
+            )
+        except (ChatResponseTooLongError, ChatContentFilteredError) as e:
+            await self.send_message_to_group(
+                MESSAGE_TYPE_ERROR, str(e), MessageSender.ASSISTANT
             )
         except Exception as e:
             logger.error(ERR_UNEXPECTED_LOG.format(error=str(e)))
