@@ -37,6 +37,7 @@ Populate the database:
 This command populates both the relational and vector databases, including sample data such as FAQ entries. Since vector representations are generated during this process, the encoder must be available.
 
 ```bash
+python manage.py migrate
 python manage.py populate_data
 ```
 

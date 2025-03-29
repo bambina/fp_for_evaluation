@@ -4,6 +4,10 @@ from core.constants import *
 
 
 class FAQEntry(models.Model):
+    """
+    Model for storing FAQ entries for a charity website."
+    """
+
     question = models.CharField(max_length=MAX_QUESTION_LEN)
     answer = models.TextField(max_length=MAX_ANSWER_LEN)
     created_at = models.DateTimeField(auto_now_add=True)

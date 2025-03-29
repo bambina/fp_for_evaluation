@@ -1,8 +1,13 @@
 from django.db import models
+
 from core.constants import *
 
 
 class Country(models.Model):
+    """
+    Model for storing country information for the Sponsor a Child program.
+    """
+
     # ISO 3166-1 numeric code
     numeric_code = models.CharField(
         max_length=3, unique=True, help_text="ISO 3166-1 numeric code for the country"
@@ -19,12 +24,18 @@ class Country(models.Model):
         indexes = [
             models.Index(fields=["name"]),
         ]
+        verbose_name = "Country"
+        verbose_name_plural = "Countries"
 
     def __str__(self):
         return self.name
 
 
 class Gender(models.Model):
+    """
+    Model for storing gender options for children in the Sponsor a Child program.
+    """
+
     name = models.CharField(max_length=50, unique=True)
 
     class Meta:
@@ -35,6 +46,10 @@ class Gender(models.Model):
 
 
 class Child(models.Model):
+    """
+    Model for storing information about children in the Sponsor a Child program.
+    """
+
     name = models.CharField(max_length=MAX_CHILD_NAME_LEN)
     age = models.PositiveIntegerField()
     gender = models.ForeignKey(
@@ -56,6 +71,8 @@ class Child(models.Model):
             models.Index(fields=["name"]),
             models.Index(fields=["country"]),
         ]
+        verbose_name = "Child"
+        verbose_name_plural = "Children"
 
     def __str__(self):
         return f"{self.name} ({self.age}), {self.country.name}, {self.date_of_birth}"
