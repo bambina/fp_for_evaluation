@@ -1,16 +1,25 @@
-<div class="container">
-    <footer class="py-3 my-4">
-        <ul class="nav justify-content-center border-bottom pb-3 mb-3">
+<div class="container-fluid bg-light mt-5 border-top">
+    <footer class="py-4">
+        <ul class="nav justify-content-center mb-3">
             <li class="nav-item">
-                <a href="{% url 'top-page' %}" class="nav-link px-2 text-body-secondary">Top</a>
+                <a href="{% url 'core:top' %}"
+                   class="nav-link px-3 text-muted fw-medium">Top</a>
             </li>
             <li class="nav-item">
-                <a href="#" class="nav-link px-2 text-body-secondary">FAQ</a>
+                <a href="{% url 'faq_list' %}"
+                   class="nav-link px-3 text-muted fw-medium">FAQs</a>
             </li>
             <li class="nav-item">
-                <a href="#" class="nav-link px-2 text-body-secondary">About</a>
+                <a href="{% url 'sponsors:child_list' %}"
+                   class="nav-link px-3 text-muted fw-medium">Sponsor a Child</a>
+            </li>
+            <li class="nav-item">
+                <a href="{% url 'start-chat' %}"
+                   class="nav-link px-3 text-muted fw-medium">Chat with Nico</a>
             </li>
         </ul>
-        <p class="text-center text-body-secondary">Sponsor A Child</p>
+        <p class="text-center text-muted small mb-0">
+            &copy; 2025 <strong class="text-dark">The Virtual Charity</strong>. All rights reserved.
+        </p>
     </footer>
 </div>

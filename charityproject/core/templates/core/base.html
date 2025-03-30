@@ -16,7 +16,9 @@
     <body>
         {% include "./header.html" %}
         {% block content %}{% endblock %}
-        {% comment %} {% include "./footer.html" %} {% endcomment %}
+        {% if request.resolver_match.url_name != 'start-chat' %}
+            {% include "./footer.html" %}
+        {% endif %}
     </body>
     {% block extra_static %}{% endblock %}
 </html>
