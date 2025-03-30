@@ -11,6 +11,8 @@ from core.utils import *
 
 
 class OpenAIClientService:
+    """Service class for interacting with the OpenAI chat completion API."""
+
     _client = None
 
     @classmethod
@@ -127,10 +129,13 @@ class OpenAIClientService:
 
 
 class RedisChatHistoryService:
+    """Service class for storing and retrieving chat history."""
+
     _redis = None
 
     @classmethod
     def init_redis(cls):
+        """Initialize the Redis client."""
         if cls._redis is None:
             try:
                 cls._redis = redis.Redis.from_url(
@@ -142,6 +147,9 @@ class RedisChatHistoryService:
 
     @classmethod
     def save_message(cls, session_id, sender, message, timestamp, ttl_sec=60 * 60):
+        """
+        Save a chat message to Redis.
+        """
         log_user_test(f"{sender} message: {message}")
         if cls._redis is None:
             cls.init_redis()
@@ -160,6 +168,9 @@ class RedisChatHistoryService:
 
     @classmethod
     def get_chat_history(cls, session_id):
+        """
+        Retrieve the chat history for a given session.
+        """
         if cls._redis is None:
             cls.init_redis()
 
@@ -170,6 +181,9 @@ class RedisChatHistoryService:
 
     @classmethod
     def compose_messages(cls, chat_history):
+        """
+        Convert chat history to a format compatible with chat completion models.
+        """
         messages = []
         for chat in chat_history:
             messages.append({"role": chat["sender"], "content": chat["message"]})
