@@ -70,7 +70,7 @@ class OpenAIClientService:
         sorted_faqs = sorted(unique_faqs, key=lambda x: x["distance"], reverse=True)
         # Format top N FAQs with their details and URLs
         for faq in sorted_faqs[:max_faqs]:
-            faq_url = reverse("faq_detail", kwargs={"pk": faq["id"]})
+            faq_url = reverse("faqs:faq_detail", kwargs={"pk": faq["id"]})
             formatted_content += RELEVANT_DOCS_FORMAT.format(
                 id=faq["id"],
                 question=faq["entity"]["question"],

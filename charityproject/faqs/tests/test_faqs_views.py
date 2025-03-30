@@ -11,7 +11,7 @@ class TestFAQListPage:
     @pytest.fixture
     def url(self):
         # FAQ List page URL
-        return reverse("faq_list")
+        return reverse("faqs:faq_list")
 
     def test_faq_page_contains_expected_content(self, client, url):
         """
@@ -40,7 +40,7 @@ class TestFAQDetailPage:
     @pytest.fixture
     def url(self, faq):
         # Generate the URL for the FAQ detail page
-        return reverse("faq_detail", kwargs={"pk": faq.pk})
+        return reverse("faqs:faq_detail", kwargs={"pk": faq.pk})
 
     def test_faq_detail_page_contains_expected_content(self, client, url, faq):
         """

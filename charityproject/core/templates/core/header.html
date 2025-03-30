@@ -15,8 +15,8 @@
                     </a>
                 </li>
                 <li>
-                    <a href="{% url 'faq_list' %}"
-                       class="nav-link px-2 {% if request.resolver_match.url_name == 'faq_list' %}text-secondary{% else %}text-white{% endif %}">FAQs</a>
+                    <a href="{% url 'faqs:faq_list' %}"
+                       class="nav-link px-2 {% if request.resolver_match.namespace == 'faqs' %}text-secondary{% else %}text-white{% endif %}">FAQs</a>
                 </li>
                 <li>
                     <a href="{% url 'sponsors:child_list' %}"
