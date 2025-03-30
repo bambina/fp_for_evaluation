@@ -23,8 +23,8 @@
                        class="nav-link px-2 {% if request.resolver_match.namespace == 'sponsors' %}text-secondary{% else %}text-white{% endif %}">Sponsor a Child</a>
                 </li>
                 <li>
-                    <a href="{% url 'start-chat' %}"
-                       class="nav-link px-2 {% if request.resolver_match.url_name == 'start-chat' %}text-secondary{% else %}text-white{% endif %}">Chat with Nico</a>
+                    <a href="{% url 'agent:start-chat' %}"
+                       class="nav-link px-2 {% if request.resolver_match.namespace == 'agent' and request.resolver_match.url_name == 'start-chat' %}text-secondary{% else %}text-white{% endif %}">Chat with Nico</a>
                 </li>
             </ul>
         </div>

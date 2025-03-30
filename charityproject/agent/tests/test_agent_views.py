@@ -8,7 +8,7 @@ class TestChatPage:
     @pytest.fixture
     def url(self):
         # Set the URL to the chat page
-        return reverse("start-chat")
+        return reverse("agent:start-chat")
 
     def test_chat_page_renders_without_footer(self, client, url):
         """
