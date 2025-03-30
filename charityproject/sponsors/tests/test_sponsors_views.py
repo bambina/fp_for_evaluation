@@ -11,13 +11,27 @@ from django.core.paginator import Paginator
 class TestSponsorViews:
     @pytest.fixture
     def list_url(self):
-        # Set the URL to the Sponsor a Child page
+        # URL for the child list page
         return reverse("sponsors:child_list")
 
-    # @pytest.fixture
-    # def detail_url(self):
-    #     # Set the URL to the Sponsor a Child page
-    #     return reverse("sponsors:child_detail", args=[1])
+    @pytest.fixture
+    def detail_url(self, child_data):
+        # URL for the child detail page
+        return reverse("sponsors:child_detail", kwargs={"pk": child_data.pk})
+
+    @pytest.fixture
+    def child_data(self):
+        # Create a child with related gender and country
+        gender = baker.make(Gender, name="Male")
+        country = baker.make(Country, name="Uganda")
+        return baker.make(
+            Child,
+            name="Carlos",
+            age=10,
+            gender=gender,
+            country=country,
+            profile_description="He enjoys painting and dreams of becoming an artist.",
+        )
 
     @pytest.fixture
     def children_data(self):
@@ -41,12 +55,42 @@ class TestSponsorViews:
         baker.make(Child, _quantity=10, country=country, gender=gender2)
         return Child.objects.all().order_by("name")
 
+    def test_child_list_page_contains_expected_content(
+        self, client, list_url, child_data
+    ):
+        """
+        Ensure the Child list page returns 200, lists child information,
+        and includes the header and footer.
+        """
+        response = client.get(list_url)
+        assert response.status_code == 200
+
+        decoded_content = response.content.decode("utf-8")
+        assert child_data.name in decoded_content
+        assert str(child_data.country) in decoded_content
+        assert "<header" in decoded_content
+        assert "<footer" in decoded_content
+
+    def test_child_detail_page_contains_expected_content(
+        self, client, detail_url, child_data
+    ):
+        """
+        Ensure the Child detail page returns 200, shows child details,
+        and includes the header and footer.
+        """
+        response = client.get(detail_url)
+        assert response.status_code == 200
+
+        decoded_content = response.content.decode("utf-8")
+        assert child_data.name in decoded_content
+        assert str(child_data.age) in decoded_content
+        assert str(child_data.country) in decoded_content
+        assert "<header" in decoded_content
+        assert "<footer" in decoded_content
+
     def test_child_list_when_no_children_exists(self, client, list_url):
         """
-        Test if the page:
-        1. Returns 200 status code
-        2. Shows "Sponsor a Child" title
-        3. Shows "No children found" message when database is empty
+        Ensure the page returns 200, displays the title, and shows a message when no children are available.
         """
         response = client.get(list_url)
         assert response.status_code == 200
