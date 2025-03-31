@@ -1,11 +1,11 @@
 import pytest
-from pytest_mock import mocker
+from model_bakery import baker
+from unittest.mock import patch
+
 from agent.orchestrators import *
 from agent.constants import *
 from conftest import *
-from model_bakery import baker
 from sponsors.models import *
-from unittest.mock import patch
 
 
 @pytest.mark.django_db(transaction=True)

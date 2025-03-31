@@ -1,7 +1,8 @@
 from django.shortcuts import render
+
+from agent.constants import *
 from agent.utils import generate_session_id
 from core.utils import track_user_with_session
-from agent.constants import *
 
 
 # Create your views here.

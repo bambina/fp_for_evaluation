@@ -1,17 +1,15 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.core.paginator import Paginator
+from django.shortcuts import get_object_or_404
+from django.views.decorators.csrf import csrf_exempt
+from django.contrib import messages
+from django.http import JsonResponse
+
 from sponsors.repositories import *
 from sponsors.models import *
 from sponsors.forms import ChildSearchForm
-from django.shortcuts import get_object_or_404
-
-from core.utils import track_user_with_session
-from django.views.decorators.csrf import csrf_exempt
-
-from django.shortcuts import redirect
-from django.contrib import messages
-from django.http import JsonResponse
 from sponsors.constants import *
+from core.utils import track_user_with_session
 
 
 def child_list(request):

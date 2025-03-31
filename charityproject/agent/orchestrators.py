@@ -1,6 +1,5 @@
 import ast, random
 from typing import Optional
-
 from openai import NOT_GIVEN, ChatCompletion
 
 from agent.constants import *

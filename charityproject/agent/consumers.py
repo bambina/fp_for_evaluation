@@ -11,8 +11,9 @@ from agent.constants import *
 from agent.utils import *
 from agent.services import *
 from agent.orchestrators import *
-from semanticsearch.services import *
 from agent.models import *
+from semanticsearch.services import *
+
 
 logger = logging.getLogger(PROJECT_LOGGER_NAME)
 

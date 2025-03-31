@@ -1,4 +1,5 @@
 from django.urls import path
+
 from agent import views
 
 app_name = "agent"

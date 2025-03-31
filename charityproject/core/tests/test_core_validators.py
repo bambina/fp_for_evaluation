@@ -1,5 +1,6 @@
-from core.validators import *
 import pytest
+
+from core.validators import *
 
 
 class TestCoreValidators:

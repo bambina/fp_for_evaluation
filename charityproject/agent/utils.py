@@ -1,5 +1,6 @@
 # This file contains utility functions for the webapp.
 import uuid, hashlib
+
 from django.conf import settings
 
 

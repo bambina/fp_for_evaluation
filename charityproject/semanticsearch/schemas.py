@@ -4,6 +4,10 @@ from core.constants import *
 
 
 def create_faq_schema():
+    """
+    Create and return a Milvus collection schema for storing FAQ entries.
+    The schema includes question/answer texts and their vector representations.
+    """
     # Define the schema fields
     fields = [
         FieldSchema(
@@ -57,6 +61,9 @@ def create_faq_index_params(index_params):
 
 
 def create_child_schema():
+    """
+    Create and return a Milvus collection schema for storing child profiles.
+    """
     # Define the schema fields
     fields = [
         FieldSchema(

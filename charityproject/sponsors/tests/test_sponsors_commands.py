@@ -1,12 +1,17 @@
-from django.core.management import call_command
 import pytest
-from sponsors.models import *
 from io import StringIO
-from datetime import datetime, date
+from datetime import datetime
+
+from django.core.management import call_command
+
+from sponsors.models import *
 
 
 @pytest.mark.django_db
-def test_populate_data():
+def test_populate_sponsor_data():
+    """
+    Test the 'populate_sponsor_data' custom management command in test mode.
+    """
     out = StringIO()
     call_command("populate_sponsor_data", "--test", stdout=out)
 

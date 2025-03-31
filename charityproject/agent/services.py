@@ -4,9 +4,9 @@ from openai import NOT_GIVEN
 import redis
 
 from django.conf import settings
-from agent.constants import *
 from django.urls import reverse
 
+from agent.constants import *
 from core.utils import *
 
 
@@ -110,7 +110,6 @@ class OpenAIClientService:
             )
         else:
             system_content = SYSTEM_PROMPT_HANDLE_SPONSOR_SEARCH_FALLBACK
-        print(f"System content: {system_content + profiles}")
         return system_content + profiles
 
     @classmethod

@@ -1,9 +1,11 @@
+import csv
+from pathlib import Path
+
 from django.core.management.base import BaseCommand
 from django.conf import settings
-from sponsors.models import *
-import csv
 from django.core.exceptions import ValidationError
-from pathlib import Path
+
+from sponsors.models import *
 from core.validators import *
 from core.utils import *
 from sponsors.utils import *
@@ -68,6 +70,7 @@ class Command(BaseCommand):
             Gender.objects.all().delete()
 
             # Populate the database
+            # Load and insert country data
             country_records = self.read_country_data(file_paths["country"])
             Country.objects.bulk_create(country_records)
             write_success(
@@ -76,7 +79,7 @@ class Command(BaseCommand):
                 f"{len(country_records)} items created from {kwargs['country']}",
             )
             total_records += len(country_records)
-
+            # Load and insert gender data
             gender_records = self.read_gender_data(file_paths["gender"])
             Gender.objects.bulk_create(gender_records)
             write_success(
@@ -85,7 +88,7 @@ class Command(BaseCommand):
                 f"{len(gender_records)} items created from {kwargs['gender']}",
             )
             total_records += len(gender_records)
-
+            # Load and insert child data
             childlen_records = self.read_child_data(file_paths["child"])
             Child.objects.bulk_create(childlen_records)
             write_success(
@@ -106,6 +109,9 @@ class Command(BaseCommand):
             )
 
     def read_country_data(self, file_path):
+        """
+        Read and validate country data from a CSV file.
+        """
         countries = []
         with open(file_path, mode="r", encoding="utf-8") as csv_file:
             csv_reader = csv.reader(csv_file, delimiter=",")
@@ -137,6 +143,9 @@ class Command(BaseCommand):
         return countries
 
     def read_gender_data(self, file_path):
+        """
+        Read and validate gender data from a CSV file.
+        """
         genders = []
         seen_names = set()  # Track unique names
         with open(file_path, mode="r", encoding="utf-8") as csv_file:
@@ -164,6 +173,9 @@ class Command(BaseCommand):
         return genders
 
     def read_child_data(self, file_path):
+        """
+        Read and validate child data from a CSV file, including foreign key references.
+        """
         children = []
         with open(file_path, mode="r", encoding="utf-8") as csv_file:
             csv_reader = csv.reader(csv_file, delimiter=",")

@@ -38,13 +38,16 @@ if DEBUG:
 
 # Load environment variables from .env file
 load_dotenv()
+
+# API keys
 KAGGLE_USERNAME = os.getenv("KAGGLE_USERNAME")
 KAGGLE_KEY = os.getenv("KAGGLE_KEY")
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 
-# Cache directory
+# Local cache directory (default: ~/.cache)
 CACHE_DIR = Path(os.getenv("CACHE_DIR", os.path.expanduser("~/.cache")))
 
+# Path to Universal Sentence Encoder model directory
 USE_MODEL_DIR = str(
     CACHE_DIR
     / "kagglehub"
@@ -56,13 +59,16 @@ USE_MODEL_DIR = str(
     / "2"
 )
 
+# Paths to vector database files
 VECTOR_DB_FILE = str(BASE_DIR / "charity_chatbot.db")
 VECTOR_DB_FILE_TEST = str(BASE_DIR / "charity_chatbot_test.db")
 
+# Redis URL for storing chat history
 REDIS_CHAT_HISTORY_URL = os.getenv(
     "REDIS_CHAT_HISTORY_URL", f"redis://localhost:6379/0"
 )
 
+# Base URL for Bootstrap Icons
 BS_ICONS_BASE_URL = "https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/"
 
 # Application definition
@@ -113,14 +119,17 @@ TEMPLATES = [
     },
 ]
 
+# Uncomment this if using WSGI instead of ASGI
 # WSGI_APPLICATION = "charityproject.wsgi.application"
 
-# Channels
+# ASGI application path for Django Channels
 ASGI_APPLICATION = "charityproject.asgi.application"
+# Channel layer configuration using Redis
 CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "channels_redis.core.RedisChannelLayer",
         "CONFIG": {
+            # Redis server host, port, and DB index (DB 1 in this case)
             "hosts": [("127.0.0.1", 6379, 1)],
         },
     },
