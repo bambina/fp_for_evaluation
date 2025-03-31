@@ -67,6 +67,16 @@ pytest charityproject --cov charityproject
 ```
 
 
+## Chatbot Evaluation
+
+The performance of the developed chatbot was evaluated using the RAGAS framework.  
+The code used for the evaluation is provided in the `evaluation` folder.  
+See the following notebook for details:  
+[evaluation/ragas_evaluation_example.ipynb](evaluation/ragas_evaluation_example.ipynb)
+
+This notebook demonstrates how RAGAS was applied to assess the system’s performance on a sample query.
+
+
 ## License
 
 This project is submitted for academic evaluation only. No license has been applied at this stage.
