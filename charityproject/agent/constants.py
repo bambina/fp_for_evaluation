@@ -1,9 +1,7 @@
+# Error messages
 ERR_MISSING_FIELDS = "Missing required fields"
 ERR_INVALID_JSON = "Invalid JSON received"
 ERR_UNEXPECTED_LOG = "Unexpected error occurred: {error}."
-MESSAGE_TYPE_ASSISTANT = "assistant.message"
-MESSAGE_TYPE_ERROR = "error.message"
-MESSAGE_TYPE_CLOSE = "websocket.close"
 ERR_MSG_UNEXPECTED = "Unexpected error occurred. We apologize for the inconvenience. Please try again after a while."
 ERR_MSG_MISSING_FIELDS = (
     "Required fields are missing. Please provide both 'message' and 'sender' fields."
@@ -11,7 +9,13 @@ ERR_MSG_MISSING_FIELDS = (
 ERR_MSG_INVALID_JSON = (
     "Invalid JSON format. Please check the message format and try again."
 )
+# Message types used in WebSocket communication
+MESSAGE_TYPE_ASSISTANT = "assistant.message"
+MESSAGE_TYPE_ERROR = "error.message"
+MESSAGE_TYPE_CLOSE = "websocket.close"
+# WebSocket close code for unauthorized access
 UNAUTHORIZED_ACCESS_CODE = 4001
+# Limit for number of recommended children to return
 MAX_CHILDREN_RESULTS = 3
 
 
@@ -79,7 +83,7 @@ Thank you for visiting The Virtual Charity's website—your support means the wo
 Feel free to ask me anything!
 """
 
-SYSTEM_CONTENT_1 = """
+SYSTEM_PROMPT_INITIAL_INSTRUCTION = """
 You are Nico, an assistant for The Virtual Charity's website. Maintain a warm, approachable, and professional attitude in all your responses.
 Always address users in a friendly and supportive manner, ensuring clarity and helpfulness.
 Determine if the user's query requires using a specific function:
@@ -113,7 +117,7 @@ Examples of when to use "search_relevant_faqs":
 
 """
 
-SYSTEM_CONTENT_2 = """
+SYSTEM_PROMPT_HANDLE_FAQ = """
 You are Nico, an assistant for The Virtual Charity's website. Your role is to provide accurate and helpful answers strictly based on the information provided.
 Maintain a warm, approachable, and professional attitude in all your responses.
 
@@ -132,7 +136,7 @@ Here is the list of relevant documents:
 
 """
 
-SYSTEM_CONTENT_3 = """
+SYSTEM_PROMPT_HANDLE_SPONSOR_SEARCH = """
 You are Nico, an assistant for The Virtual Charity's website.
 The Virtual Charity is dedicated to supporting children in need through its Sponsor a Child program, which connects sponsors with children to improve their education, health, and quality of life.
 Your role is to introduce children to potential sponsors in a warm, engaging, and professional manner, based strictly on the provided information.
@@ -156,15 +160,15 @@ Here are the details of the {num_children} children. {note}:
 
 """
 
-SEMANTIC_SEARCH_NOTE = """
+SEMANTIC_SEARCH_INSTRUCTION = """
 A semantic search was performed using the keyword(s) {keyword}.
 Maintain the ORDER in which the children are provided, as they are ranked based on relevance.
 Results may include children whose profiles are related to the search term but do not exactly match. For example, searching for a child who likes 'soccer' may also return children interested in 'sports' in general."""
 
-FILTERED_SEARCH_NOTE = """
+FILTERED_RESULT_INSTRUCTION = """
 Introduce EVERY child from the provided list, without exception."""
 
-SYSTEM_CONTENT_4 = """
+SYSTEM_PROMPT_HANDLE_SPONSOR_SEARCH_FALLBACK = """
 You are Nico, an assistant for The Virtual Charity's website.
 The Virtual Charity is dedicated to supporting children in need through its Sponsor a Child program, which connects sponsors with children to improve their education, health, and quality of life.
 Your role is to help sponsors find children to support based on their stated preferences, ensuring a warm and engaging experience throughout the process.

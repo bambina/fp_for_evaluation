@@ -21,7 +21,7 @@ class ChatOrchestrator:
         chat_history = RedisChatHistoryService.get_chat_history(room_name)
         # Generate an initial response from the API
         completion = OpenAIClientService.chat_completion(
-            SELECTED_MODEL, SYSTEM_CONTENT_1, chat_history, TOOLS
+            SELECTED_MODEL, SYSTEM_PROMPT_INITIAL_INSTRUCTION, chat_history, TOOLS
         )
         finish_reason = completion.choices[0].finish_reason
         # Handle tool calls if requested by the model

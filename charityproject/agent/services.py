@@ -79,7 +79,7 @@ class OpenAIClientService:
                 answer=faq["entity"]["answer"],
                 link=faq_url,
             )
-        return SYSTEM_CONTENT_2 + formatted_content
+        return SYSTEM_PROMPT_HANDLE_FAQ + formatted_content
 
     @classmethod
     def compose_child_introduction(
@@ -101,15 +101,15 @@ class OpenAIClientService:
         profiles = "\n---\n".join(profiles_list)
         if is_found:
             note = (
-                SEMANTIC_SEARCH_NOTE.format(keyword=semantic_search_keyword)
+                SEMANTIC_SEARCH_INSTRUCTION.format(keyword=semantic_search_keyword)
                 if semantic_search_keyword
-                else FILTERED_SEARCH_NOTE
+                else FILTERED_RESULT_INSTRUCTION
             )
-            system_content = SYSTEM_CONTENT_3.format(
+            system_content = SYSTEM_PROMPT_HANDLE_SPONSOR_SEARCH.format(
                 num_children=len(profiles_list), note=note
             )
         else:
-            system_content = SYSTEM_CONTENT_4
+            system_content = SYSTEM_PROMPT_HANDLE_SPONSOR_SEARCH_FALLBACK
         print(f"System content: {system_content + profiles}")
         return system_content + profiles
 

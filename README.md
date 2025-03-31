@@ -29,7 +29,7 @@ pip install -r requirements.txt
 Download the USE model:
 
 ```bash
-python manage.py download_use_model
+python charityproject/manage.py download_use_model
 ```
 
 Populate the database:
@@ -37,8 +37,8 @@ Populate the database:
 This command populates both the relational and vector databases, including sample data such as FAQ entries. Since vector representations are generated during this process, the encoder must be available.
 
 ```bash
-python manage.py migrate
-python manage.py populate_data
+python charityproject/manage.py migrate
+python charityproject/manage.py populate_data
 ```
 
 Start the Redis server:
@@ -50,7 +50,7 @@ redis-server
 Run the Django development server:
 
 ```bash
-python manage.py runserver
+python charityproject/manage.py runserver
 ```
 
 
